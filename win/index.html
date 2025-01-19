@@ -1,0 +1,430 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <title>慧芯耀乡,智灯启梦 | Binging</title>
+    <meta name="author" content="HiW" />
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <link rel="icon" href="/images/avatar3.jpg" />
+    <link rel="preconnect" href="https://cdn.staticfile.org" />
+<script src="https://cdn.staticfile.org/vue/3.3.7/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.4.2/css/all.min.css" />
+<link rel="preconnect" href="https://fonts.loli.net" />
+<link rel="preconnect" href="https://gstatic.loli.net" crossorigin />
+<link rel="stylesheet" href="https://fonts.loli.net/css2?family=Fira+Code:wght@400;500;600;700&family=Lexend:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap" />
+<script> const mixins = {}; </script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://cdn.staticfile.org/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.staticfile.org/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://cdn.staticfile.org/highlight.js/11.9.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+    <div id="layout">
+        <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存 浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+        </transition>
+        <div id="menu" :class="{ hidden: hiddenMenu, 'menu-color': menuColor}">
+    <nav id="desktop-menu">
+        <a class="title" href="/">
+            <span>BINGING</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;文档搜索</span>
+        </a>
+        
+        <a href="/categories/hexo/">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags/hexo/">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+        <a href="/songse">
+            <i class="fa-solid fa-circle-down fa-fw"></i>
+            <span>&ensp;产品资料</span>
+        </a>
+        
+        <a target="_blank" rel="noopener" href="https://cn.bing.com/?mkt=zh-cn">
+            <i class="fa-solid fa-fa-solid fa-archway fa-fw"></i>
+            <span>&ensp;必应</span>
+        </a>
+        
+    </nav>
+    <nav id="mobile-menu">
+        <div class="title" @click="showMenuItems = !showMenuItems">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;BINGING</span>
+        </div>
+        <transition name="slide">
+            <div class="items" v-show="showMenuItems">
+                
+                <a href="/">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-house fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                    </div>
+                </a>
+                
+                <a href="/about">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-id-card fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                    </div>
+                </a>
+                
+                <a href="/archives">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-box-archive fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">文档搜索</div>
+                    </div>
+                </a>
+                
+                <a href="/categories/hexo/">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-bookmark fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                    </div>
+                </a>
+                
+                <a href="/tags/hexo/">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-tags fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                    </div>
+                </a>
+                
+                <a href="/songse">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-circle-down fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">产品资料</div>
+                    </div>
+                </a>
+                
+                <a target="_blank" rel="noopener" href="https://cn.bing.com/?mkt=zh-cn">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-fa-solid fa-archway fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">必应</div>
+                    </div>
+                </a>
+                
+            </div>
+        </transition>
+    </nav>
+</div>
+<transition name="fade">
+    <div id="menu-curtain" @click="showMenuItems = !showMenuItems" v-show="showMenuItems"></div>
+</transition>
+
+        <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
+            <div class="article">
+    <div>
+        <h1>慧芯耀乡,智灯启梦</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/11/22
+        </span>
+        
+        
+    </div>
+    
+    <div class="content" v-pre>
+        <div style="width: 50%;padding-left: 25%">
+
+<p><img src="/win/img/1.jpg"></p>
+</div>
+
+<h1 id="项目背景"><a href="#项目背景" class="headerlink" title="项目背景"></a><p style="color: #5056EF;">项目背景</p></h1><p>近年，国务院印发了《数字乡村发展战略纲要》，随着国家有关智慧农村建设“十四五”规划不断推进，以及人们对美好生活的不断追求，服务于人民群众的生活基础服务设施越来越多。<br>但众多的服务设施也给政府部门带来繁重的巡检任务，如何更好地管理这些服务设施成为政府部门当前的一大难题。<br>为了解决这个问题，我们团队在老师的指导下，研发出一种产品：基于5G的数字乡村智慧路灯管理系统。<br>团队带来的产品兼容了安防系统、屏幕环境数据显示、语音交互、智能防漏电保护、USB应急充电、雾化功能等，后期还会扩充大量功能。<br>可通过APP、WEB端等可以实时查询各区域漏电开关的闭合或断开状态及时间周期，判断乡村公共能源设施是否出现故障，实现远程巡检，<br>能够有效地减轻政府巡检压力和防止漏电事故发生。</p>
+<h1 id="目标市场"><a href="#目标市场" class="headerlink" title="目标市场"></a><p style="color: #5056EF;">目标市场</p></h1><p>据统计，我国乡村已经安装了近1.8亿盏路灯，每年的能源消耗量巨大，智能照明的推进可以有效缓解能源的消耗。<br>因此，在智能家居设备领域，智能照明是一个具有广阔前景的细分市场。根据IDC的数据显示，智能照明设备在整个智能家居设备行业内的出货量规模相对较小，但仍存在巨大的发展空间。<br>预计2021年的增长率将达到90%，而从2020年到2025年的出货量复合增长率也将超过60%。<br>此外，根据高工产研LED研究所的数据，2021年中国LED智慧照明市场总规模预计达到466亿元，其中室内智慧照明的市场规模将达到273亿元。<br><img src="/win/img/%E5%9B%BE%E7%89%871.png"></p>
+<h1 id="系统架构"><a href="#系统架构" class="headerlink" title="系统架构"></a><p style="color: #5056EF;">系统架构</p></h1><p>本系统由硬件装置和软件管理系统两部分组成，硬件部为智能检测装置，由EMC输入电路、隔离式开关电源模块、LED灯组模块、漏电开关<br>输入检测模块、数据采集模块、MCU主控模块（JMPT32F001）、通讯模块（物联网通讯模块NB-IOT）、天线电路以及SIM卡电路等组成；<br>软件管理系统，分为Web前端和移动app端，由资产管理子系统，运营管理子系统、故障处理子系统和辅助管理子系统等组成。<br><img src="/win/img/%E5%9B%BE%E7%89%872.png"><br>智能检测装置，集成EMC输入电路、隔离式开关电源、LED灯组（含调光）、漏电检测、数据采集（涵盖光强、温湿度、PM2.5、<br>雨量、车流量）、JMPT32F001的MCU主控、NB-IOT通讯、天线及SIM卡电路。<br>该装置不仅采集乡村环境信息，还监测数字乡村公共能源设施漏电状态。<br>MCU模块依据环境数据与软件管理系统指令，智能调控LED灯组开关与亮度，同时实时将数据上传至云平台及工作人员移动端。<br>此举极大促进了数字乡村公共能源设施管理的智能化与精细化，便于相关人员高效监控设施状态，及时维护，推动数字乡村的可持续发展。<br><img src="/win/img/%E5%9B%BE%E7%89%872.png"></p>
+<h1 id="软件管理系统功能"><a href="#软件管理系统功能" class="headerlink" title="软件管理系统功能"></a><p style="color: #5056EF;">软件管理系统功能</p></h1><p><img src="/win/img/%E5%9B%BE%E7%89%873.png"><br>软件管理系统，分为Web前端和移动app端，由资产管理子系统，运营管理子系统、故障处理子系统和辅助管理子系统等组成。<br>资产管理子系统负责数字乡村公共能源设施设备基础数据的录入和导出并通过GPS定位技术，通过图形化手段，将设备资产按实际情况反映在系统电脑界面上；<br>运营管理系统负责数字乡村公共能源设施控制管理、能耗管理，即在数字乡村公共能源设施实际运营维护和管理过程中，通过对数字乡村公共能源设施的智能控制。<br>以及结合后期综合评价分析结果调整使用策略，降低数字乡村公共能源设施能耗最终以实现数字乡村公共能源设施节能；<br>故障处理子系统负责数字乡村公共能源设施故障分析报警，通过移动应用软件（APP）在移动终端上实现对数字乡村公共能源设施<br>控制的各种维修操作，实现从派工、现场施工到完工报告的流程化管理、海量数据管理；辅助管理子系统负责员工管理、区域管理。</p>
+<details>
+
+<summary>产品功能模块（点击查看详细）</summary>
+
+<table>
+<thead>
+<tr>
+<th>系统模块</th>
+<th>功能模块</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>一、管理后台</td>
+<td>添加设备同时设备的区域，不同的区域有不同的员工负责，异常当前区域的员工负责去处理</td>
+</tr>
+<tr>
+<td>员工管理</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>员工账号创建</td>
+</tr>
+<tr>
+<td></td>
+<td>员工信息查询</td>
+</tr>
+<tr>
+<td></td>
+<td>修改员工信息</td>
+</tr>
+<tr>
+<td></td>
+<td>excel导出所有员工</td>
+</tr>
+<tr>
+<td>区域管理</td>
+<td>区域信息添加&#x2F;修改&#x2F;删除</td>
+</tr>
+<tr>
+<td></td>
+<td>区域员工设置</td>
+</tr>
+<tr>
+<td>设备管理</td>
+<td>部署设备</td>
+</tr>
+<tr>
+<td></td>
+<td>修改部署设备</td>
+</tr>
+<tr>
+<td></td>
+<td>删除部署设备</td>
+</tr>
+<tr>
+<td></td>
+<td>查询部署设备</td>
+</tr>
+<tr>
+<td></td>
+<td>excel导出部署设备清单</td>
+</tr>
+<tr>
+<td>设备运营控制</td>
+<td>公共能源设施控制管理</td>
+</tr>
+<tr>
+<td></td>
+<td>公共能源设施能源管理</td>
+</tr>
+<tr>
+<td></td>
+<td>数据分析总结</td>
+</tr>
+<tr>
+<td>故障处理</td>
+<td>异常设备列表</td>
+</tr>
+<tr>
+<td></td>
+<td>查询某异设备</td>
+</tr>
+<tr>
+<td></td>
+<td>异常通知</td>
+</tr>
+<tr>
+<td></td>
+<td>异常报警时间设置</td>
+</tr>
+<tr>
+<td>APP接口</td>
+<td>app登录接口</td>
+</tr>
+<tr>
+<td></td>
+<td>设备状况接口</td>
+</tr>
+<tr>
+<td></td>
+<td>所有设备列表</td>
+</tr>
+<tr>
+<td></td>
+<td>异常设备列表</td>
+</tr>
+<tr>
+<td></td>
+<td>异常处理反馈</td>
+</tr>
+<tr>
+<td></td>
+<td>注销接口</td>
+</tr>
+<tr>
+<td>硬件接口</td>
+<td>心跳包</td>
+</tr>
+<tr>
+<td></td>
+<td>跳闸接口</td>
+</tr>
+<tr>
+<td></td>
+<td>正常接口</td>
+</tr>
+<tr>
+<td>设备日志管理</td>
+<td>日志列表</td>
+</tr>
+<tr>
+<td></td>
+<td>查询某设备日志</td>
+</tr>
+<tr>
+<td></td>
+<td>查询维修日志</td>
+</tr>
+<tr>
+<td>报表统计</td>
+<td>查询报表功能</td>
+</tr>
+<tr>
+<td>应用前端</td>
+<td></td>
+</tr>
+<tr>
+<td>移动端APP</td>
+<td>登录</td>
+</tr>
+<tr>
+<td></td>
+<td>设备列表</td>
+</tr>
+</tbody></table>
+</details>
+
+
+<h1 id="产品性能和兼容性"><a href="#产品性能和兼容性" class="headerlink" title="产品性能和兼容性"></a><p style="color: #5056EF;">产品性能和兼容性</p></h1><p>在测试环境中，需要对系统的兼容性进行测试，主要包括：<br>浏览器兼容性：测试系统在不同浏览器上的兼容性，包括但不限于Chrome、Firefox、IE等。<br>操作系统兼容性：测试系统在不同操作系统上的兼容性，包括但不限于Windows、Linux、macOS等。<br>手机端兼容性：测试系统在不同手机型号、不同操作系统版本上的兼容性，包括但不限于iOS、Android等。</p>
+<h2 id="1-节能性："><a href="#1-节能性：" class="headerlink" title="1.节能性："></a>1.节能性：</h2><p>节能率不低于20%，乡村不同季节，不同天气，不同应用场景需求均有差异，基于自动控制+远程控制功能，满足不同场景的需求下，最大化优化控制策略，实现不低于20%的节能效率。</p>
+<h2 id="2-稳定可靠性："><a href="#2-稳定可靠性：" class="headerlink" title="2.稳定可靠性："></a>2.稳定可靠性：</h2><p>系统稳定性提升80%，实时监控数字乡村公共能源设施运行状态和用能质量，针对性制定维护计划，提升设施运行稳定性、可靠性的同时，可进一步降低运维难度和成本。</p>
+<h2 id="3-拓展性："><a href="#3-拓展性：" class="headerlink" title="3.拓展性："></a>3.拓展性：</h2><p>系统丰富的可拓展性，数字乡村公共能源设施是乡村居民高频体验场景，系统实现智能化、数字化，便于接入实现数字智能场景，为数字乡村的建设提供良好基础和可拓展性。</p>
+<h2 id="4-安全性："><a href="#4-安全性：" class="headerlink" title="4.安全性："></a>4.安全性：</h2><p>数字乡村公共能源设施是数字乡村安全和用电安全的重要环节，过去依赖传统人工运维和管理方式，既不能保障设施和环境安全，还造成巨大的低效运维成本，基于5G通信的数字乡村公共能源设施的系统应用，可有效保障用电安全，实时推送故障和安全风险告警，实现保障安全应用价值。<br><img src="/win/img/%E5%9B%BE%E7%89%874.jpg"></p>
+<h1 id="产品相关资料"><a href="#产品相关资料" class="headerlink" title="产品相关资料"></a><p style="color: #5056EF;">产品相关资料</p></h1><p>软件开源代码：<br>国内访问：<a target="_blank" rel="noopener" href="https://gitee.com/KSweb/ludeng">https://gitee.com/KSweb/ludeng</a><br>国外访问：<a target="_blank" rel="noopener" href="https://github.com/HiW666/ludeng/tree/master">https://github.com/HiW666/ludeng/tree/master</a></p>
+<p>硬件开放资料：<a target="_blank" rel="noopener" href="https://7gz7xs-my.sharepoint.com/:w:/g/personal/admin_orillais_tech/Effe_HzsUSFEvb0Fj2d1he8BNFV7KthTO3xsM_IxoLyQtg?e=EBvRnN">链接跳转</a></p>
+<p>相关视频：</p>
+<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=113852905691755&bvid=BV1guwqeJErS&cid=27952285430&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+
+<p>合作企业：</p>
+<div style="width: 25%;padding-left: 37.5%">
+
+<p><img src="/win/img/4.jpg"></p>
+</div>
+
+<center>江门市唯信科技有限公司</center>
+
+<p><img src="/win/img/3.png"></p>
+<center><a target="_blank" rel="noopener" href="http://www.gdwisdom.cn/">启睿数字科技（广州）有限公司</a></center>
+    </div>
+    
+    
+    
+    
+    
+    
+    
+</div>
+
+            <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2020 - 2025 Binging
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;HiW
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo </a> &amp;
+            <a target="_blank" rel="noopener" href="https://gitee.com/KSweb/hexo-theme-particlex">binging hexo</a>
+        </div>
+        
+    </div>
+   
+</footer>
+
+        </div>
+        
+        <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+        </transition>
+        
+    </div>
+    <script src="/js/main.js"></script>
+    
+    
+
+
+
+
+    
+</body>
+</html>
