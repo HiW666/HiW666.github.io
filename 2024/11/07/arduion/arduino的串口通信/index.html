@@ -1,0 +1,982 @@
+  <!DOCTYPE html>
+  <html lang="zh-CN"  
+      data-theme-mode="auto"
+  >
+  <head>
+  <meta charset="utf-8">
+  
+  
+  
+  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN":"复制成功 (*^▽^*)"},"fail":{"zh-CN":"复制失败 (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'http://localhost:4000';</script>
+  <title>
+    arduino的串口通信 | Binging
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic|Noto Serif SC:400,400italic,700,700italic&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic|Noto Serif SC:400,400italic,700,700italic&display=swap" media="print" onload="this.media='all'">
+    
+<link rel="stylesheet" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/regular.min.css" integrity="sha384-4qYppzjH8EiA+cGdaubu2vL7Rk8WGiqCSj7oRuP1uwtFWkfKNHD20lPfcrbQc8dU" crossorigin="anonymous">
+<link rel="stylesheet" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/solid.min.css" integrity="sha384-wbMWab3UDSPm2kvIgVOn&#x2F;d9KPTecgPU1+Nb3zoQrm&#x2F;oVu0EkPL6IaKinjbwW0rum" crossorigin="anonymous">
+
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/brands.min.css" integrity="sha384-KTGeC2hIMzpeQakhsmzB9bZfhCD5xZZCgI1iZH6f/O457SxzlkzTQg/WXFNoi3ih" crossorigin="anonymous">
+<link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/v5-font-face.min.css" integrity="sha384-nJ1ThfldViXoLpJ6jlKcP2beas8BMbYq26SG9Hi8cH89bZi4RZ644v7helMCqJxd" crossorigin="anonymous">
+<link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/v4-font-face.min.css" integrity="sha384-UlkrhOIvZxJFd4MElSUp7ow6/RUeYKi/orfCZIRRiOENFuQPIAA3T3HjYfmBRhNq" crossorigin="anonymous">
+    
+<link rel="stylesheet" href="/css/loader.css">
+
+    <meta name="description" content="arduino的串口通信工程下载 arduino提供了非常强大的串口通信函数，这可能是我唯一觉得arduino的优点他可以使用简单的函数配置和使用串口与其他设备进行通信当然串口通信还是要看单片机是否有指定的IO也不是所有的IO都支持串口">
+<meta property="og:type" content="article">
+<meta property="og:title" content="arduino的串口通信">
+<meta property="og:url" content="http://localhost:4000/2024/11/07/arduion/arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E9%80%9A%E4%BF%A1/index.html">
+<meta property="og:site_name" content="Binging">
+<meta property="og:description" content="arduino的串口通信工程下载 arduino提供了非常强大的串口通信函数，这可能是我唯一觉得arduino的优点他可以使用简单的函数配置和使用串口与其他设备进行通信当然串口通信还是要看单片机是否有指定的IO也不是所有的IO都支持串口">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-11-07T13:30:00.000Z">
+<meta property="article:modified_time" content="2026-04-09T03:15:24.765Z">
+<meta property="article:author" content="HiW">
+<meta property="article:tag" content="ESP32">
+<meta property="article:tag" content="arduino">
+<meta name="twitter:card" content="summary">
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.css" integrity="sha384-IfxC36XL/toUyJ939C73PcgMuRzAZuIzZxE38drsmO5p6jD7ei+Zx/1oA/0l8ysE" crossorigin="anonymous">
+    
+<script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous"></script>
+
+    
+<link rel="stylesheet" href="https://npm.webcache.cn/@reimujs/aos@0.1.2/dist/aos.css" integrity="sha384-GMRP93c6Hkz9JVKGAuRR3nTS7M07RwPgTFenXiosjq2VbVgvdDNcz1g6Mkj8AONa" crossorigin="anonymous">
+
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+  <body>
+      <div id='loader'>
+    <div class="loading-left-bg loading-bg"></div>
+    <div class="loading-right-bg loading-bg"></div>
+    <div class="spinner-box">
+      <div class="loading-taichi rotate">
+          <svg width="150" height="150" viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="https://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+            <path d="M303.5 432A80 80 0 0 1 291.5 592A80 80 0 0 1 303.5 432z" fill="var(--red-1, #ff5252)" />
+            <path d="M512 65A447 447 0 0 1 512 959L512 929A417 417 0 0 0 512 95A417 417 0 0 0 512 929L512 959A447 447 0 0 1 512 65z 
+           M512 95A417 417 0 0 1 929 512A208.5 208.5 0 0 1 720.5 720.5L720.5 592A80 80 0 0 0 720.5 432A80 80 0 0 0 720.5 592L720.5 720.5A208.5 208.5 0 0 1 512 512A208.5 208.5 0 0 0 303.5 303.5A208.5 208.5 0 0 0 95 512A417 417 0 0 1 512 95z" fill="var(--red-1, #ff5252)" />
+          </svg>
+      </div>
+      <div class="loading-word">少女祈祷中...</div>
+    </div>
+  </div>
+  <script>
+    var time = null;
+    var loaderEl = document.getElementById('loader');
+    var startLoading = () => {
+      time = Date.now();
+      loaderEl.classList.remove("loading");
+    }
+    var hideLoader = () => {
+      document.body.style.overflow = 'auto';
+      loader.classList.add('loading');
+    };
+
+    var endLoading = () => {
+      if (!time) {
+        hideLoader();
+      } else {
+        if (Date.now() - time > 500) {
+          time = null;
+          hideLoader();
+        } else {
+          setTimeout(endLoading, 500 - (Date.now() - time));
+          time = null;
+        }
+      }
+    }
+    window.addEventListener('DOMContentLoaded', endLoading);
+    loaderEl.addEventListener('click', endLoading);
+  </script>
+<div id="copy-tooltip"></div>
+<div id="heatmap-tooltip"></div>
+
+
+    <div id="container">
+      <div id="wrap">
+        <div id="header-nav">
+  <nav id="main-nav" aria-label="Primary navigation">
+        <a class="main-nav-link-wrap" href="/">
+            <div class="main-nav-icon icon ">
+                  &#xe3af;
+            </div>
+          <span class="main-nav-link">首页</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/archives">
+            <div class="main-nav-icon icon ">
+                  &#xf187;
+            </div>
+          <span class="main-nav-link">归档</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/about">
+            <div class="main-nav-icon icon ">
+                  &#xf05a;
+            </div>
+          <span class="main-nav-link">关于</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/friend">
+            <div class="main-nav-icon icon ">
+                  &#xf500;
+            </div>
+          <span class="main-nav-link">友链</span>
+        </a>
+    <a id="main-nav-toggle" class="nav-icon" aria-label="Toggle navigation" role="button"></a>
+  </nav>
+  <nav id="sub-nav" aria-label="Secondary navigation">
+      <a id="nav-search-btn" class="nav-icon popup-trigger" title="搜索" aria-label="搜索"></a>
+  </nav>
+</div>
+<header id="header" aria-label="Site header">
+        <picture>
+        </picture>
+          <img  fetchpriority="high" src="/images/banner.webp" alt="arduino的串口通信">
+  <div id="header-outer">
+    <div id="header-title">
+          <span id="logo">
+            <h1 data-aos="slide-up">arduino的串口通信</h1>
+          </span>
+        <h2 id="subtitle-wrap" data-aos="slide-down">
+        </h2>
+    </div>
+  </div>
+</header>
+
+        <div id="content" aria-label="Page content"  class="sidebar-right" >
+          <aside id="sidebar" aria-label="Sidebar">
+  <div class="sidebar-wrapper-container sticky">
+  <div class="sidebar-wrapper">
+    <div class="sidebar-wrap" data-aos="fade-up">
+          <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E9%80%9A%E4%BF%A1"><span class="toc-number">1.</span> <span class="toc-text">arduino的串口通信</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E6%98%AF%E5%90%A6%E6%8E%A5%E6%94%B6%E5%88%B0%E6%95%B0%E6%8D%AE"><span class="toc-number">2.</span> <span class="toc-text">arduino的串口是否接收到数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E7%A6%81%E7%94%A8%E4%B8%B2%E5%8F%A3"><span class="toc-number">3.</span> <span class="toc-text">arduino的禁用串口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E6%9F%A5%E6%89%BE%E4%B8%B2%E5%8F%A3%E6%98%AF%E5%90%A6%E6%9C%89%E6%8C%87%E5%AE%9A%E6%95%B0%E6%8D%AE"><span class="toc-number">4.</span> <span class="toc-text">arduino的查找串口是否有指定数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E6%9F%A5%E6%89%BE%E4%B8%B2%E5%8F%A3%E6%98%AF%E5%90%A6%E6%9C%89%E6%8C%87%E5%AE%9A%E6%95%B0%E6%8D%AE%E5%B8%A6%E7%BB%93%E6%9D%9F"><span class="toc-number">5.</span> <span class="toc-text">arduino的查找串口是否有指定数据带结束</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E6%95%B0%E6%8D%AE%E6%8F%90%E5%8F%96%E6%95%B4%E5%BD%A2%E7%B1%BB%E5%9E%8B%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="toc-number">6.</span> <span class="toc-text">arduino的串口数据提取整形类型的数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E6%95%B0%E6%8D%AE%E6%8F%90%E5%8F%96%E6%B5%AE%E7%82%B9%E5%9E%8B%E7%B1%BB%E5%9E%8B%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="toc-number">7.</span> <span class="toc-text">arduino的串口数据提取浮点型类型的数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E5%88%9D%E5%A7%8B%E5%8C%96%E8%AE%BE%E7%BD%AE%E6%B3%A2%E7%89%B9%E7%8E%87"><span class="toc-number">8.</span> <span class="toc-text">arduino的串口初始化设置波特率</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E5%8F%91%E9%80%81%E4%B8%80%E4%B8%AA%E5%AD%97%E8%8A%82"><span class="toc-number">9.</span> <span class="toc-text">arduino的串口发送一个字节</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E5%8F%91%E9%80%81%E6%95%B0%E6%8D%AE"><span class="toc-number">10.</span> <span class="toc-text">arduino的串口发送数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E5%8F%91%E9%80%81%E6%95%B0%E6%8D%AE%E5%B8%A6%E6%8D%A2%E8%A1%8C"><span class="toc-number">11.</span> <span class="toc-text">arduino的串口发送数据带换行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E8%AF%BB%E5%8F%96%E4%B8%80%E4%B8%AA%E5%AD%97%E8%8A%82%EF%BC%88%E9%9D%9E%E6%95%B0%E6%8D%AE%E6%B5%81%EF%BC%89"><span class="toc-number">12.</span> <span class="toc-text">arduino的串口读取一个字节（非数据流）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E8%AF%BB%E5%8F%96%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">13.</span> <span class="toc-text">arduino的串口读取字符串</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E8%AF%BB%E5%8F%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%B8%A6%E7%BB%88%E6%AD%A2"><span class="toc-number">14.</span> <span class="toc-text">arduino的串口读取字符串带终止</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E8%AF%BB%E5%8F%96%E4%B8%80%E4%B8%AA%E5%AD%97%E8%8A%82%EF%BC%88%E6%95%B0%E6%8D%AE%E6%B5%81%EF%BC%89"><span class="toc-number">15.</span> <span class="toc-text">arduino的串口读取一个字节（数据流）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E5%B9%B6%E4%B8%94%E5%AD%98%E5%82%A8%E5%9C%A8%E6%95%B0%E7%BB%84%E4%B8%AD"><span class="toc-number">16.</span> <span class="toc-text">arduino的串口读取数据并且存储在数组中</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E5%B9%B6%E4%B8%94%E5%AD%98%E5%82%A8%E5%9C%A8%E6%95%B0%E7%BB%84%E4%B8%AD%E5%B8%A6%E5%81%9C%E6%AD%A2"><span class="toc-number">17.</span> <span class="toc-text">arduino的串口读取数据并且存储在数组中带停止</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E6%9F%A5%E6%89%BE%E4%B8%B2%E5%8F%A3%E8%AE%BE%E7%BD%AE%E7%BC%93%E5%AD%98%E5%8C%BA"><span class="toc-number">18.</span> <span class="toc-text">arduino的查找串口设置缓存区</span></a></li></ol>
+</div>
+</div>
+          <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="HiW" class="lazyload">
+  <div class="sidebar-author-name">HiW</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">36</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">9</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">14</div>
+  </div>
+</div>
+<div class="sidebar-social" >
+</div>
+<div class="sidebar-menu">
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="首页"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xe3af;
+          </div>
+        <div class="sidebar-menu-link">首页</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf187;
+          </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/about" aria-label="关于"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf05a;
+          </div>
+        <div class="sidebar-menu-link">关于</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf500;
+          </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+</div>
+</div>
+          <div class="sidebar-btn-wrapper" style="position:static">
+            <div class="sidebar-toc-btn current"></div>
+            <div class="sidebar-common-btn"></div>
+          </div>
+    </div>
+  </div>
+  <div class="sidebar-widget">
+  </div>
+  </div>
+</aside>
+
+          <section id="main" aria-label="Main content"><article id="post-arduion/arduino的串口通信" class="h-entry article" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner" data-aos="fade-up">
+    <div class="article-meta">
+      <div class="article-date">
+  <span class="article-date-link icon-calendar" data-aos="zoom-in">
+    <time datetime="2024-11-07T13:30:00.000Z" itemprop="datePublished">2024-11-07</time>
+    <time style="display: none;" id="post-update-time">2026-04-09</time>
+  </span>
+</div>
+
+    </div>
+    
+    <div class="hr-line"></div>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+        <h2 id="arduino的串口通信"><a href="#arduino的串口通信" class="headerlink" title="arduino的串口通信"></a>arduino的串口通信</h2><p><a target="_blank" rel="noopener" href="https://pan.baidu.com/s/1dxKUrDeoobj41xB9lVkXcg?pwd=fdeo">工程下载</a></p>
+<p>arduino提供了非常强大的串口通信函数，这可能是我唯一觉得arduino的优点<br>他可以使用简单的函数配置和使用串口与其他设备进行通信<br>当然串口通信还是要看单片机是否有指定的IO<br>也不是所有的IO都支持串口</p>
+<span id="more"></span>
+<h2 id="arduino的串口是否接收到数据"><a href="#arduino的串口是否接收到数据" class="headerlink" title="arduino的串口是否接收到数据"></a>arduino的串口是否接收到数据</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Serial.available()</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>返回值</td>
+<td>无</td>
+<td>无</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<p>该函数将会返回等待读取的数据字节数<br>等待读取的数据字节数。</p>
+<h2 id="arduino的禁用串口"><a href="#arduino的禁用串口" class="headerlink" title="arduino的禁用串口"></a>arduino的禁用串口</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Serial.end()    </span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>返回值</td>
+<td>int</td>
+<td>返回等待读取的数据字节数</td>
+<td>等待读取的数据字节数</td>
+</tr>
+</tbody></table>
+<p>终止串行通讯，包括rx，tx<br>可调用 Serial.begin()重新打开串行通讯。</p>
+<h2 id="arduino的查找串口是否有指定数据"><a href="#arduino的查找串口是否有指定数据" class="headerlink" title="arduino的查找串口是否有指定数据"></a>arduino的查找串口是否有指定数据</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Stream.find(target)</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>target</td>
+<td><code>char</code> &#x2F; <code>char*</code> &#x2F; &#96;String</td>
+<td>要搜索的<strong>目标字符&#x2F;字符串</strong>（区分大小写）</td>
+<td>无</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>bool(布尔型)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<p>target为数据内容：<br>被查找字符串。<br>允许使用String或char类型。</p>
+<p>返回值：如果接收到的数据内容一致就会返回真（不为0的数）<br>否者就是假（0）bool类型</p>
+<h2 id="arduino的查找串口是否有指定数据带结束"><a href="#arduino的查找串口是否有指定数据带结束" class="headerlink" title="arduino的查找串口是否有指定数据带结束"></a>arduino的查找串口是否有指定数据带结束</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Stream.findUntil(target, terminator)</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>target</td>
+<td>允许使用String或char类型</td>
+<td>开始执行数据内容</td>
+<td>无</td>
+</tr>
+<tr>
+<td>terminator</td>
+<td>允许使用String或char类型</td>
+<td>终止的数据内容</td>
+<td>无</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>bool(布尔型)</td>
+<td>如果串口读取到的和开始执行数据内容一致</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<p>target开始执行数据内容：<br>允许使用String或char类型。如果串口读取到的和开始执行数据内容一致<br>就会返回真，否者为假<br>terminator终止的数据内容：<br>用于设置终止函数执行的字符串信息。<br>设备在读取数据时一旦读取到此终止字符串，将会结束函数执行并返回。<br>可以用于开始和结束函数</p>
+<h2 id="arduino的串口数据提取整形类型的数据"><a href="#arduino的串口数据提取整形类型的数据" class="headerlink" title="arduino的串口数据提取整形类型的数据"></a>arduino的串口数据提取整形类型的数据</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Serial.parseInt()</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>—</td>
+<td>—</td>
+<td>被查找字符串</td>
+<td>—</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>long</td>
+<td>在输入信息中找到的整数数值</td>
+<td>—</td>
+</tr>
+<tr>
+<td>返回值：</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>在输入信息中找到的整数数值。类型：long</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>其他数据会丢失</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h2 id="arduino的串口数据提取浮点型类型的数据"><a href="#arduino的串口数据提取浮点型类型的数据" class="headerlink" title="arduino的串口数据提取浮点型类型的数据"></a>arduino的串口数据提取浮点型类型的数据</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Serial.parseFloat()</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>—</td>
+<td>—</td>
+<td>被查找字符串</td>
+<td>—</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>float</td>
+<td>在输入信息中找到浮点数值</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<p>返回值：<br>在输入信息中找到浮点数值。类型：float</p>
+<h2 id="arduino的串口初始化设置波特率"><a href="#arduino的串口初始化设置波特率" class="headerlink" title="arduino的串口初始化设置波特率"></a>arduino的串口初始化设置波特率</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Serial.begin(speed)</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>speed</td>
+<td>—</td>
+<td>设置波特率</td>
+<td>看下方</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>无</td>
+<td>无</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<p>speed为波特率：<br>设置电脑与Arduino进行串口通讯时的数据传输速率（每秒传输字节数）。<br>可使用以下速率：300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600,  115200等<br>你也可以根据你所使用的设备而设置其他传输速率。（数据类型： long）</p>
+<h2 id="arduino的串口发送一个字节"><a href="#arduino的串口发送一个字节" class="headerlink" title="arduino的串口发送一个字节"></a>arduino的串口发送一个字节</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Serial.write(val)</span><br><span class="line">Serial.write(str)</span><br><span class="line">Serial.write(buf, len)</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>val(字节)</td>
+<td>—</td>
+<td>只发送单个字节</td>
+<td>比如发送123就会变成0x49 0x50 0x51</td>
+</tr>
+<tr>
+<td>str(字符串)</td>
+<td>—</td>
+<td>发送一串</td>
+<td>比如发送123就会变成0x49 0x50 0x51</td>
+</tr>
+<tr>
+<td>buf(字节数组)</td>
+<td>—</td>
+<td>把字节存里面</td>
+<td>—</td>
+</tr>
+<tr>
+<td>len(长度)</td>
+<td>—</td>
+<td>发送多少的字节</td>
+<td>—</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>无</td>
+<td>会返回发送的字节数</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<p>val是字节：<br>0x（xx）<br>str是字符串：<br>比如发送123就会变成0x49 0x50 0x51<br>buf是字节数组：<br>创建数组，把字节存里面<br>len是长度：<br>发送多少的字节<br>返回值：<br>会返回发送的字节数。</p>
+<h2 id="arduino的串口发送数据"><a href="#arduino的串口发送数据" class="headerlink" title="arduino的串口发送数据"></a>arduino的串口发送数据</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Serial.print(val, format)</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>val</td>
+<td>—</td>
+<td>模式为工作模式</td>
+<td>—</td>
+</tr>
+<tr>
+<td>format</td>
+<td>—</td>
+<td>指定小数点的位数</td>
+<td>看下方</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>无</td>
+<td>会返回发送的字节数</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<p>val在这里是模式：<br>如果忽略format参数，只用val的指定模式的情况下，默认以ASCII码形式发送</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Serial.print(val)</span><br></pre></td></tr></table></figure>
+<p>模式：<br>BIN (binary二进制)<br>OCT (octal八进制)<br>DEC (decimal十进制)<br>HEX (hexadecimal十六进制)<br>format是指定小数点的位数：输入具体的数字来指定多少位<br>Serial.print(78, BIN) 发送 “1001110”<br>Serial.print(78, OCT) 发送 “116”<br>Serial.print(78, DEC) 发送 “78”<br>Serial.print(78, HEX) 发送 “4E”<br>Serial.println(1.23456, 0) 发送 “1”<br>Serial.println(1.23456, 2) 发送 “1.23”<br>Serial.println(1.23456, 4) 发送 “1.2346”</p>
+<p>你可以用F()把待发送的字符串包装到flash存储器。例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Serial.print(F(“Hello World”))</span><br></pre></td></tr></table></figure>
+
+<h2 id="arduino的串口发送数据带换行"><a href="#arduino的串口发送数据带换行" class="headerlink" title="arduino的串口发送数据带换行"></a>arduino的串口发送数据带换行</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Serial.println(数据,  模式)</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>val</td>
+<td>—</td>
+<td>模式为工作模式</td>
+<td>看上方</td>
+</tr>
+<tr>
+<td>format</td>
+<td>—</td>
+<td>指定小数点的位数</td>
+<td>看上方</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>无</td>
+<td>会返回发送的字节数</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<p>具体参数不多说和上面的一样，只是多了换行</p>
+<h2 id="arduino的串口读取一个字节（非数据流）"><a href="#arduino的串口读取一个字节（非数据流）" class="headerlink" title="arduino的串口读取一个字节（非数据流）"></a>arduino的串口读取一个字节（非数据流）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Serial.peek();</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>返回值</td>
+<td>int</td>
+<td>看下方</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<p>读取一个字节的数据，如果没数据返回值为0，<br>如果是一串数据的话，第一个数据读出后不会消失所以只能读取第一个数据<br>使用read可以读取一串数据</p>
+<h2 id="arduino的串口读取字符串"><a href="#arduino的串口读取字符串" class="headerlink" title="arduino的串口读取字符串"></a>arduino的串口读取字符串</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Serial.readString()</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>返回值</td>
+<td>String</td>
+<td>看下方</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<p>返回值：<br>接收到的数据，类型为字符串。</p>
+<h2 id="arduino的串口读取字符串带终止"><a href="#arduino的串口读取字符串带终止" class="headerlink" title="arduino的串口读取字符串带终止"></a>arduino的串口读取字符串带终止</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Serial.readStringUntil(terminator);</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>terminator</td>
+<td>—</td>
+<td>终止符用于设置终止函数执行的字符信息</td>
+<td>—</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>String</td>
+<td>接收到的数据</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<p>终止符：<br>终止字符。用于设置终止函数执行的字符信息。<br>设备在读取数据时一旦读取到此终止字符，将会结束函数执行。允许使用char类型。<br>返回值：<br>接收到的数据，类型为字符串。</p>
+<h2 id="arduino的串口读取一个字节（数据流）"><a href="#arduino的串口读取一个字节（数据流）" class="headerlink" title="arduino的串口读取一个字节（数据流）"></a>arduino的串口读取一个字节（数据流）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Serial.read()</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>返回值</td>
+<td>int</td>
+<td>看下方</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<p>返回值：<br>设备没有接收到数据时，返回值为-1<br>设备接收到数据时，返回值为接收到的数据流中的1个字符<br>函数可用于从设备接收到数据中读取一个字节的数据。<br>读取数据流，数据会放缓存里面，<br>读取一个数据就会丢失一个数据，下一个数据就会替换上去</p>
+<h2 id="arduino的串口读取数据并且存储在数组中"><a href="#arduino的串口读取数据并且存储在数组中" class="headerlink" title="arduino的串口读取数据并且存储在数组中"></a>arduino的串口读取数据并且存储在数组中</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">stream.readBytes(buffer, length)</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>buffer</td>
+<td>char或者byte</td>
+<td>用于存储读取到的信息</td>
+<td>—</td>
+</tr>
+<tr>
+<td>length</td>
+<td>int</td>
+<td>是读取字节上限</td>
+<td>—</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>int</td>
+<td>实际成功读取到的字节数量</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<p>buffer是变量&#x2F;数组：<br>用于存储读取到的信息。允许使用char或者byte类型的变量或数组。<br>length是读取字节上限：<br>指定的字节数量后就会停止运行。允许使用int类型</p>
+<h2 id="arduino的串口读取数据并且存储在数组中带停止"><a href="#arduino的串口读取数据并且存储在数组中带停止" class="headerlink" title="arduino的串口读取数据并且存储在数组中带停止"></a>arduino的串口读取数据并且存储在数组中带停止</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">stream.readBytesUntil(character, buffer, length)</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>character</td>
+<td>—</td>
+<td>终止符用于设置终止函数执行的字符信息</td>
+<td>—</td>
+</tr>
+<tr>
+<td>buffer</td>
+<td>char或者byte</td>
+<td>用于存储读取到的信息</td>
+<td>—</td>
+</tr>
+<tr>
+<td>length</td>
+<td>int</td>
+<td>是读取字节上限</td>
+<td>—</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>int</td>
+<td>实际成功读取到的字节数量</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<p>character是终止字符:<br>用于设置终止函数执行的字符信息。设备在读取数据时一旦读取到此终止字符<br>将会结束函数执行。允许使用char类型。<br>buffer是变量&#x2F;数组：<br>用于存储读取到的信息。允许使用char或者byte类型的变量或数组。<br>length是读取字节上限：<br>指定的字节数量后就会停止运行。允许使用int类型</p>
+<h2 id="arduino的查找串口设置缓存区"><a href="#arduino的查找串口设置缓存区" class="headerlink" title="arduino的查找串口设置缓存区"></a>arduino的查找串口设置缓存区</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Serial.flush()</span><br></pre></td></tr></table></figure>
+<p>flush函数不具备清楚缓存效果<br>当我们通过Serial.print或Serial.println来发送数据时，被发送的字符数据将会存储于开发板的“发送缓存”中。<br>这么做的原因是开发板串行通讯速率不是很高，如果发送数据较多，发送时间会比较长。<br>在没有使用flush函数的情况下，开发板不会等待所有“发送缓存”中数据都发送完毕再执行后续的程序内容。<br>也就是说，开发板是在后台发送缓存中的数据。程序运行不受影响。<br>相反的，在使用了flush函数的情况下，开发板是会等待所有“发送缓存”中数据都发送完毕以后，再执行后续的程序内容。</p>
+<p>补充：<br>清除接收缓存</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">void setup() &#123;</span><br><span class="line">Serial.begin(9600);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void loop() &#123;</span><br><span class="line"> clean ();//清除缓存的函数</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void clean ()</span><br><span class="line">&#123;</span><br><span class="line">// 以下while循环语句将会清除接收缓存内容。</span><br><span class="line">// 具体工作原理是这样的。每当有数据输入接收缓存后，</span><br><span class="line">// 我们可以使用Serial.read()来读取接收缓存中的内容。</span><br><span class="line">// 这时，如果我们对Serial.read()函数的返回值不加以任何利用</span><br><span class="line">// 那么读取到的数据，也就是Serial.read()函数的返回值将会在</span><br><span class="line">// 下一次执行Serial.read时所抛弃。利用while循环语句，我们可以</span><br><span class="line">// 保证在接收缓存中有数据的时候，反复将串口接收缓存中的信息读取并抛弃。</span><br><span class="line">// 从而达到清除接收缓存的目的。</span><br><span class="line">while(Serial.available())&#123;</span><br><span class="line">    Serial.println(&quot;Clearing Serial Incoming Buffer.&quot;);</span><br><span class="line">    Serial.read();</span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line">// 当接收缓存为空时，Serial.read返回值为“-1”</span><br><span class="line">// 通过以下语句我们将看到无论我们是否通过串口监视器</span><br><span class="line">// 输入信息，开发板的串口监视器会一直输出:</span><br><span class="line">// &quot;Incoming Buffer is Clear.&quot;</span><br><span class="line">// 这是因为接收缓存中的信息被以上while语句中的内容给清除掉了。</span><br><span class="line">if (Serial.read() == -1)&#123;</span><br><span class="line">    Serial.println(&quot;Incoming Buffer is Clear.&quot;);</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用方法：<br>1、Serial.begin(波特率);先配置波特率<br>2、 Serial.print(数据, 模式);发送<br>3、Serial.read();读取</p>
+<p>如果要使用多个串口<br>Serialx.begin();x不填就是默认UART0，1就是UART1<br>比如<br>Serial1.begin()就是使用UART1<br>Serial2.begin()就是使用UART2</p>
+
+    </div>
+    <footer class="article-footer">
+        <a class="article-category-link" href="/categories/arduino/" title="arduino" data-aos="zoom-in">arduino</a>
+
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="/tags/ESP32/" rel="tag" title="ESP32">ESP32</a></li><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="/tags/arduino/" rel="tag" title="arduino">arduino</a></li></ul>
+
+    </footer>
+  </div>
+    <nav id="article-nav" aria-label="Article navigation" data-aos="fade-up">
+      <div class="article-nav-link-wrap left">
+            <img data-src="/images/banner.webp" data-sizes="auto" alt="arduino基于stm32基本信息" class="lazyload">
+        <a href="/2024/11/21/arduion/arduino%E5%9F%BA%E4%BA%8Estm32%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF/" aria-label="前一篇: arduino基于stm32基本信息" title="前一篇: arduino基于stm32基本信息"></a>
+        <div class="article-nav-caption">前一篇</div>
+        <h3 class="article-nav-title">
+            arduino基于stm32基本信息
+        </h3>
+      </div>
+    <div class="article-nav-link-wrap right">
+          <img data-src="/images/banner.webp" data-sizes="auto" alt="arduino的音谱文件" class="lazyload">
+      <a href="/2024/11/06/arduion/arduino%E7%9A%84%E9%9F%B3%E8%B0%B1%E6%96%87%E4%BB%B6/" aria-label="后一篇: arduino的音谱文件"  title="后一篇: arduino的音谱文件"></a>
+      <div class="article-nav-caption">后一篇</div>
+      <h3 class="article-nav-title">
+          arduino的音谱文件
+      </h3>
+    </div>
+  </nav>
+
+</article>
+
+
+</section>
+        </div>
+        <footer id="footer" aria-label="Site footer">
+  <div style="width: 100%; overflow: hidden">
+    <div class="footer-line"></div>
+  </div>
+  <div id="footer-info">
+    <div>
+      <span class="icon-copyright"></span>
+        2020-2026
+        <span class="footer-info-sep rotate"></span>
+      HiW
+    </div>
+  </div>
+</footer>
+
+          <div class="sidebar-top">
+            <div class="sidebar-top-taichi rotate"></div>
+            <div class="arrow-up"></div>
+          </div>
+        <div id="mask" class="hide"></div>
+      </div>
+      <nav id="mobile-nav" aria-label="Mobile navigation">
+  <div class="sidebar-wrap">
+        <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E9%80%9A%E4%BF%A1"><span class="toc-number">1.</span> <span class="toc-text">arduino的串口通信</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E6%98%AF%E5%90%A6%E6%8E%A5%E6%94%B6%E5%88%B0%E6%95%B0%E6%8D%AE"><span class="toc-number">2.</span> <span class="toc-text">arduino的串口是否接收到数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E7%A6%81%E7%94%A8%E4%B8%B2%E5%8F%A3"><span class="toc-number">3.</span> <span class="toc-text">arduino的禁用串口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E6%9F%A5%E6%89%BE%E4%B8%B2%E5%8F%A3%E6%98%AF%E5%90%A6%E6%9C%89%E6%8C%87%E5%AE%9A%E6%95%B0%E6%8D%AE"><span class="toc-number">4.</span> <span class="toc-text">arduino的查找串口是否有指定数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E6%9F%A5%E6%89%BE%E4%B8%B2%E5%8F%A3%E6%98%AF%E5%90%A6%E6%9C%89%E6%8C%87%E5%AE%9A%E6%95%B0%E6%8D%AE%E5%B8%A6%E7%BB%93%E6%9D%9F"><span class="toc-number">5.</span> <span class="toc-text">arduino的查找串口是否有指定数据带结束</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E6%95%B0%E6%8D%AE%E6%8F%90%E5%8F%96%E6%95%B4%E5%BD%A2%E7%B1%BB%E5%9E%8B%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="toc-number">6.</span> <span class="toc-text">arduino的串口数据提取整形类型的数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E6%95%B0%E6%8D%AE%E6%8F%90%E5%8F%96%E6%B5%AE%E7%82%B9%E5%9E%8B%E7%B1%BB%E5%9E%8B%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="toc-number">7.</span> <span class="toc-text">arduino的串口数据提取浮点型类型的数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E5%88%9D%E5%A7%8B%E5%8C%96%E8%AE%BE%E7%BD%AE%E6%B3%A2%E7%89%B9%E7%8E%87"><span class="toc-number">8.</span> <span class="toc-text">arduino的串口初始化设置波特率</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E5%8F%91%E9%80%81%E4%B8%80%E4%B8%AA%E5%AD%97%E8%8A%82"><span class="toc-number">9.</span> <span class="toc-text">arduino的串口发送一个字节</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E5%8F%91%E9%80%81%E6%95%B0%E6%8D%AE"><span class="toc-number">10.</span> <span class="toc-text">arduino的串口发送数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E5%8F%91%E9%80%81%E6%95%B0%E6%8D%AE%E5%B8%A6%E6%8D%A2%E8%A1%8C"><span class="toc-number">11.</span> <span class="toc-text">arduino的串口发送数据带换行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E8%AF%BB%E5%8F%96%E4%B8%80%E4%B8%AA%E5%AD%97%E8%8A%82%EF%BC%88%E9%9D%9E%E6%95%B0%E6%8D%AE%E6%B5%81%EF%BC%89"><span class="toc-number">12.</span> <span class="toc-text">arduino的串口读取一个字节（非数据流）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E8%AF%BB%E5%8F%96%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">13.</span> <span class="toc-text">arduino的串口读取字符串</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E8%AF%BB%E5%8F%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%B8%A6%E7%BB%88%E6%AD%A2"><span class="toc-number">14.</span> <span class="toc-text">arduino的串口读取字符串带终止</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E8%AF%BB%E5%8F%96%E4%B8%80%E4%B8%AA%E5%AD%97%E8%8A%82%EF%BC%88%E6%95%B0%E6%8D%AE%E6%B5%81%EF%BC%89"><span class="toc-number">15.</span> <span class="toc-text">arduino的串口读取一个字节（数据流）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E5%B9%B6%E4%B8%94%E5%AD%98%E5%82%A8%E5%9C%A8%E6%95%B0%E7%BB%84%E4%B8%AD"><span class="toc-number">16.</span> <span class="toc-text">arduino的串口读取数据并且存储在数组中</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E5%B9%B6%E4%B8%94%E5%AD%98%E5%82%A8%E5%9C%A8%E6%95%B0%E7%BB%84%E4%B8%AD%E5%B8%A6%E5%81%9C%E6%AD%A2"><span class="toc-number">17.</span> <span class="toc-text">arduino的串口读取数据并且存储在数组中带停止</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arduino%E7%9A%84%E6%9F%A5%E6%89%BE%E4%B8%B2%E5%8F%A3%E8%AE%BE%E7%BD%AE%E7%BC%93%E5%AD%98%E5%8C%BA"><span class="toc-number">18.</span> <span class="toc-text">arduino的查找串口设置缓存区</span></a></li></ol>
+</div>
+</div>
+        <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="HiW" class="lazyload">
+  <div class="sidebar-author-name">HiW</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">36</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">9</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">14</div>
+  </div>
+</div>
+<div class="sidebar-social" >
+</div>
+<div class="sidebar-menu">
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="首页"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xe3af;
+          </div>
+        <div class="sidebar-menu-link">首页</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf187;
+          </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/about" aria-label="关于"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf05a;
+          </div>
+        <div class="sidebar-menu-link">关于</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf500;
+          </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+</div>
+</div>
+  </div>
+      <div class="sidebar-btn-wrapper">
+        <div class="sidebar-toc-btn current"></div>
+        <div class="sidebar-common-btn"></div>
+      </div>
+</nav>
+
+    </div>
+      <div class="site-search">
+        <div class="reimu-popup popup">
+          <div class="reimu-search">
+            <div class="reimu-search-input-icon"></div>
+            <div id="reimu-search-input"></div>
+            <div class="popup-btn-close"></div>
+          </div>
+          <div class="reimu-results">
+            <div id="reimu-stats"></div>
+            <div id="reimu-hits"></div>
+            <div id="reimu-pagination" class="reimu-pagination"></div>
+          </div>
+          <img class="reimu-bg" src="/images/reimu.png" loading="lazy" decoding="async" fetchpriority="low"/>
+        </div>
+      </div>
+    
+<script src="https://npm.webcache.cn/lazysizes@5.3.2/lazysizes.min.js" integrity="sha384-3gT&#x2F;vsepWkfz&#x2F;ff7PpWNUeMzeWoH3cDhm&#x2F;A8jM7ouoAK0&#x2F;fP&#x2F;9bcHHR5kHq2nf+e" crossorigin="anonymous"></script>
+
+
+<script src="https://npm.webcache.cn/clipboard@2.0.11/dist/clipboard.min.js" integrity="sha384-J08i8An&#x2F;QeARD9ExYpvphB8BsyOj3Gh2TSh1aLINKO3L0cMSH2dN3E22zFoXEi0Q" crossorigin="anonymous"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+  
+<script src="/js/aos.js"></script>
+
+  <script>
+    var aosInit = () => {
+      AOS.init({
+        duration: 1000,
+        easing: "ease",
+        once: true,
+        offset: 50,
+      });
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', aosInit);
+    } else {
+      aosInit();
+    }
+  </script>
+
+
+<script src="/js/pjax_script.js" data-pjax></script>
+
+
+
+  <script>
+    var ALGOLIA_CONFIG = {
+      logo: "/images/algolia_logo.svg",
+      algolia: {
+        applicationID: "29NDGCSMY6",
+        apiKey: "6d330d43eefc2a0de625b8b431bcb121",
+        indexName: "binging",
+        hits: {
+          "per_page": parseInt("10")
+        },
+        labels: {
+          "input_placeholder": "搜索.....",
+          "hits_empty": "未发现与 「${query}」相关内容",
+          "hits_stats": "找到${hits}条结果（用时 ${time} ms）"
+        }
+      }
+    };
+  </script>
+  
+<script src="https://npm.webcache.cn/algoliasearch@4.17.1/dist/algoliasearch-lite.umd.js" integrity="sha384-xvLS0jfKuoREs7pqkRI&#x2F;OI8GcqohO5S+jQz7ZBtQXnsXmD+9jDOOY4cL6dCPzlrk" crossorigin="anonymous" defer></script>
+
+  
+<script src="https://npm.webcache.cn/@reimujs/instantsearch.js@4.57.0-beta.1/dist/instantsearch.production.min.js" integrity="sha384-aagKMe8nkqaP2DYQc8kkYOL5l+M5Q2WH&#x2F;Uhr4teOh0Ybp0RZj0kUSDm45qPikMjK" crossorigin="anonymous" defer></script>
+
+  
+<script src="/js/algolia_search.js" defer></script>
+
+
+  <script>
+    var setupFirework = () => {
+      if (!false || !window.matchMedia('(max-width: 768px)').matches) {
+        window.firework && window.firework(JSON.parse('{"excludeElements":["a","button"],"particles":[{"shape":"circle","move":["emit"],"easing":"easeOutExpo","colors":["var(--red-1)","var(--red-2)","var(--red-3)","var(--red-4)"],"number":20,"duration":[1200,1800],"shapeOptions":{"radius":[16,32],"alpha":[0.3,0.5]}},{"shape":"circle","move":["diffuse"],"easing":"easeOutExpo","colors":["var(--red-0)"],"number":1,"duration":[1200,1800],"shapeOptions":{"radius":20,"alpha":[0.2,0.5],"lineWidth":6}}]}'));
+      }
+    }
+  </script>
+  
+<script src="https://npm.webcache.cn/mouse-firework@0.2.0/dist/index.umd.js" integrity="sha384-qi9WggRt19tv8Vc7pCHW3ulMNLwrn515zaLEWZjl1px07vz8+pUoWX8n1rgq282T" crossorigin="anonymous" onload="setupFirework()" defer></script>
+
+
+
+
+
+
+<div id="lazy-script">
+  <div>
+      
+      
+      <script data-pjax>
+        window.REIMU_POST = {
+          author: "HiW",
+          title: "arduino的串口通信",
+          url: "http://localhost:4000/2024/11/07/arduion/arduino%E7%9A%84%E4%B8%B2%E5%8F%A3%E9%80%9A%E4%BF%A1/",
+          excerpt: "arduino的串口通信工程下载 arduino提供了非常强大的串口通信函数，这可能是我唯一觉得arduino的优点他可以使用简单的函数配置和使用串口与其他设备进行通信当然串口通信还是要看单片机是否有指定的IO也不是所有的IO都支持串口",
+          description: "",
+          stripContent: "arduino的串口通信工程下载 arduino提供了非常强大的串口通信函数，这可能是我唯一觉得arduino的优点他可以使用简单的函数配置和使用串口与其他设备进行通信当然串口通信还是要看单片机是否有指定的IO也不是所有的IO都支持串口  arduino的串口是否接收到数据1Serial.available()     参数 数据类型 作用 选项    返回值 无 无 无   该函数将会返回等待读取的数据字节数等待读取的数据字节数。 arduino的禁用串口1Serial.end()      ",
+          date: "Thu Nov 07 2024 21:30:00 GMT+0800",
+          updated: "Thu Apr 09 2026 11:15:24 GMT+0800",
+          cover: "/images/banner.webp",
+        };
+      </script>
+        
+<script src="/js/insert_highlight.js" data-pjax></script>
+
+      
+<script src="/js/tabs.js" data-pjax defer></script>
+
+      <script type="module" data-pjax>
+        (async () => {
+          const PhotoSwipeLightbox = (await safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.min.js", "sha384-DiL6M/gG+wmTxmCRZyD1zee6lIhawn5TGvED0FOh7fXcN9B0aZ9dexSF/N6lrZi/")).default;
+          const initPswp = (gallery, children) => {
+            if (_$$(`${gallery} ${children}`).length > 0) {
+              new PhotoSwipeLightbox({
+                gallery,
+                children,
+                pswpModule: () => safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.esm.min.js", "sha384-WkkO3GCmgkC3VQWpaV8DqhKJqpzpF9JoByxDmnV8+oTJ7m3DfYEWX1fu1scuS4+s")
+              }).init();
+            }
+          }
+          const pswp = () => {
+            initPswp('.article-entry', 'a.article-gallery-item');
+            initPswp('.article-gallery', 'a.article-gallery-item');
+          }
+          pswp();
+        })();
+      </script>
+        
+
+
+  </div>
+</div>
+
+
+  <script>
+    console.log(String.raw`%c 
+ ______     ______     __     __    __     __  __    
+/\  == \   /\  ___\   /\ \   /\ "-./  \   /\ \/\ \   
+\ \  __<   \ \  __\   \ \ \  \ \ \-./\ \  \ \ \_\ \  
+ \ \_\ \_\  \ \_____\  \ \_\  \ \_\ \ \_\  \ \_____\ 
+  \/_/ /_/   \/_____/   \/_/   \/_/  \/_/   \/_____/ 
+                                                  
+`,'color: #ff5252;')
+    console.log('%c Theme.Reimu v' + '1.12.3' + ' %c https://github.com/D-Sketon/hexo-theme-reimu ', 'color: white; background: #ff5252; padding:5px 0;', 'padding:4px;border:1px solid #ff5252;')
+  </script>
+  
+
+
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
+</script>
+
+
+
+
+  </body>
+  </html>
