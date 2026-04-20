@@ -1,0 +1,715 @@
+  <!DOCTYPE html>
+  <html lang="zh-CN"  
+      data-theme-mode="auto"
+  >
+  <head>
+  <meta charset="utf-8">
+  
+  
+  
+  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN":"复制成功 (*^▽^*)"},"fail":{"zh-CN":"复制失败 (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'https://binging.top';</script>
+  <title>
+    STM32HAL库GPIO | Binging
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic|Noto Serif SC:400,400italic,700,700italic&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic|Noto Serif SC:400,400italic,700,700italic&display=swap" media="print" onload="this.media='all'">
+    
+<link rel="stylesheet" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/regular.min.css" integrity="sha384-4qYppzjH8EiA+cGdaubu2vL7Rk8WGiqCSj7oRuP1uwtFWkfKNHD20lPfcrbQc8dU" crossorigin="anonymous">
+<link rel="stylesheet" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/solid.min.css" integrity="sha384-wbMWab3UDSPm2kvIgVOn&#x2F;d9KPTecgPU1+Nb3zoQrm&#x2F;oVu0EkPL6IaKinjbwW0rum" crossorigin="anonymous">
+
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/brands.min.css" integrity="sha384-KTGeC2hIMzpeQakhsmzB9bZfhCD5xZZCgI1iZH6f/O457SxzlkzTQg/WXFNoi3ih" crossorigin="anonymous">
+<link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/v5-font-face.min.css" integrity="sha384-nJ1ThfldViXoLpJ6jlKcP2beas8BMbYq26SG9Hi8cH89bZi4RZ644v7helMCqJxd" crossorigin="anonymous">
+<link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/v4-font-face.min.css" integrity="sha384-UlkrhOIvZxJFd4MElSUp7ow6/RUeYKi/orfCZIRRiOENFuQPIAA3T3HjYfmBRhNq" crossorigin="anonymous">
+    
+<link rel="stylesheet" href="/css/loader.css">
+
+    <meta name="description" content="配置GPIO工程配置这里不赘述了 STM32HAL库配置    我们用右边图像化配置GPIO  灰色的就是没有配置的GPIO假设我们要配置PC13GPIO_Input：是配置输入GPIO_Output：是配置输出 配置GPIO输出我们点击GPIO_Output  然后选择你要的GPIO会发现红色框那边有几个参数可以进行配置    配置大类 可选选项    GPIO output level（初始输">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STM32HAL库GPIO">
+<meta property="og:url" content="https://binging.top/2026/04/20/stm/HAL%E5%BA%93/STM32HAL%E5%BA%93GPIO/index.html">
+<meta property="og:site_name" content="Binging">
+<meta property="og:description" content="配置GPIO工程配置这里不赘述了 STM32HAL库配置    我们用右边图像化配置GPIO  灰色的就是没有配置的GPIO假设我们要配置PC13GPIO_Input：是配置输入GPIO_Output：是配置输出 配置GPIO输出我们点击GPIO_Output  然后选择你要的GPIO会发现红色框那边有几个参数可以进行配置    配置大类 可选选项    GPIO output level（初始输">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93GPIO/1.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93GPIO/2.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93GPIO/3.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93GPIO/6.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93GPIO/7.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93GPIO/4.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93GPIO/5.webp">
+<meta property="article:published_time" content="2026-04-20T04:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-20T08:47:00.728Z">
+<meta property="article:author" content="HiW">
+<meta property="article:tag" content="STM32">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93GPIO/1.webp">
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.css" integrity="sha384-IfxC36XL/toUyJ939C73PcgMuRzAZuIzZxE38drsmO5p6jD7ei+Zx/1oA/0l8ysE" crossorigin="anonymous">
+    
+<script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous"></script>
+
+    
+<link rel="stylesheet" href="https://npm.webcache.cn/@reimujs/aos@0.1.2/dist/aos.css" integrity="sha384-GMRP93c6Hkz9JVKGAuRR3nTS7M07RwPgTFenXiosjq2VbVgvdDNcz1g6Mkj8AONa" crossorigin="anonymous">
+
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+  <body>
+      <div id='loader'>
+    <div class="loading-left-bg loading-bg"></div>
+    <div class="loading-right-bg loading-bg"></div>
+    <div class="spinner-box">
+      <div class="loading-taichi rotate">
+          <svg width="150" height="150" viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="https://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+            <path d="M303.5 432A80 80 0 0 1 291.5 592A80 80 0 0 1 303.5 432z" fill="var(--red-1, #ff5252)" />
+            <path d="M512 65A447 447 0 0 1 512 959L512 929A417 417 0 0 0 512 95A417 417 0 0 0 512 929L512 959A447 447 0 0 1 512 65z 
+           M512 95A417 417 0 0 1 929 512A208.5 208.5 0 0 1 720.5 720.5L720.5 592A80 80 0 0 0 720.5 432A80 80 0 0 0 720.5 592L720.5 720.5A208.5 208.5 0 0 1 512 512A208.5 208.5 0 0 0 303.5 303.5A208.5 208.5 0 0 0 95 512A417 417 0 0 1 512 95z" fill="var(--red-1, #ff5252)" />
+          </svg>
+      </div>
+      <div class="loading-word">少女祈祷中...</div>
+    </div>
+  </div>
+  <script>
+    var time = null;
+    var loaderEl = document.getElementById('loader');
+    var startLoading = () => {
+      time = Date.now();
+      loaderEl.classList.remove("loading");
+    }
+    var hideLoader = () => {
+      document.body.style.overflow = 'auto';
+      loader.classList.add('loading');
+    };
+
+    var endLoading = () => {
+      if (!time) {
+        hideLoader();
+      } else {
+        if (Date.now() - time > 500) {
+          time = null;
+          hideLoader();
+        } else {
+          setTimeout(endLoading, 500 - (Date.now() - time));
+          time = null;
+        }
+      }
+    }
+    window.addEventListener('DOMContentLoaded', endLoading);
+    loaderEl.addEventListener('click', endLoading);
+  </script>
+<div id="copy-tooltip"></div>
+<div id="heatmap-tooltip"></div>
+
+
+    <div id="container">
+      <div id="wrap">
+        <div id="header-nav">
+  <nav id="main-nav" aria-label="Primary navigation">
+        <a class="main-nav-link-wrap" href="/">
+            <div class="main-nav-icon icon ">
+                  &#xe3af;
+            </div>
+          <span class="main-nav-link">首页</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/archives">
+            <div class="main-nav-icon icon ">
+                  &#xf187;
+            </div>
+          <span class="main-nav-link">归档</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/about">
+            <div class="main-nav-icon icon ">
+                  &#xf05a;
+            </div>
+          <span class="main-nav-link">关于</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/friend">
+            <div class="main-nav-icon icon ">
+                  &#xf500;
+            </div>
+          <span class="main-nav-link">友链</span>
+        </a>
+    <a id="main-nav-toggle" class="nav-icon" aria-label="Toggle navigation" role="button"></a>
+  </nav>
+  <nav id="sub-nav" aria-label="Secondary navigation">
+      <a id="nav-search-btn" class="nav-icon popup-trigger" title="搜索" aria-label="搜索"></a>
+  </nav>
+</div>
+<header id="header" aria-label="Site header">
+        <picture>
+        </picture>
+          <img  fetchpriority="high" src="/images/banner.webp" alt="STM32HAL库GPIO">
+  <div id="header-outer">
+    <div id="header-title">
+          <span id="logo">
+            <h1 data-aos="slide-up">STM32HAL库GPIO</h1>
+          </span>
+        <h2 id="subtitle-wrap" data-aos="slide-down">
+        </h2>
+    </div>
+  </div>
+</header>
+
+        <div id="content" aria-label="Page content"  class="sidebar-right" >
+          <aside id="sidebar" aria-label="Sidebar">
+  <div class="sidebar-wrapper-container sticky">
+  <div class="sidebar-wrapper">
+    <div class="sidebar-wrap" data-aos="fade-up">
+          <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEGPIO"><span class="toc-number">1.</span> <span class="toc-text">配置GPIO</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEGPIO%E8%BE%93%E5%87%BA"><span class="toc-number">2.</span> <span class="toc-text">配置GPIO输出</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEGPIO%E8%BE%93%E5%85%A5"><span class="toc-number">3.</span> <span class="toc-text">配置GPIO输入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E7%A8%8B%E9%87%8C%E9%9D%A2%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8"><span class="toc-number">4.</span> <span class="toc-text">工程里面如何使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%97%B6%E9%92%9F"><span class="toc-number">4.1.</span> <span class="toc-text">初始化时钟</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96GPIO"><span class="toc-number">4.2.</span> <span class="toc-text">初始化GPIO</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E7%9A%84%E5%87%BD%E6%95%B0"><span class="toc-number">5.</span> <span class="toc-text">使用的函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AE%E7%94%B5%E5%B9%B3"><span class="toc-number">5.1.</span> <span class="toc-text">设置电平</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%B5%E5%B9%B3%E7%BF%BB%E8%BD%AC"><span class="toc-number">5.2.</span> <span class="toc-text">电平翻转</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E7%94%B5%E5%B9%B3"><span class="toc-number">5.3.</span> <span class="toc-text">读取电平</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BB%B6%E8%BF%9F"><span class="toc-number">5.4.</span> <span class="toc-text">延迟</span></a></li></ol></li></ol>
+</div>
+</div>
+          <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="HiW" class="lazyload">
+  <div class="sidebar-author-name">HiW</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">61</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">10</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">15</div>
+  </div>
+</div>
+<div class="sidebar-social" >
+</div>
+<div class="sidebar-menu">
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="首页"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xe3af;
+          </div>
+        <div class="sidebar-menu-link">首页</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf187;
+          </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/about" aria-label="关于"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf05a;
+          </div>
+        <div class="sidebar-menu-link">关于</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf500;
+          </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+</div>
+</div>
+          <div class="sidebar-btn-wrapper" style="position:static">
+            <div class="sidebar-toc-btn current"></div>
+            <div class="sidebar-common-btn"></div>
+          </div>
+    </div>
+  </div>
+  <div class="sidebar-widget">
+  </div>
+  </div>
+</aside>
+
+          <section id="main" aria-label="Main content"><article id="post-stm/HAL库/STM32HAL库GPIO" class="h-entry article" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner" data-aos="fade-up">
+    <div class="article-meta">
+      <div class="article-date">
+  <span class="article-date-link icon-calendar" data-aos="zoom-in">
+    <time datetime="2026-04-20T04:00:00.000Z" itemprop="datePublished">2026-04-20</time>
+    <time style="display: none;" id="post-update-time">2026-04-20</time>
+  </span>
+</div>
+
+    </div>
+    
+    <div class="hr-line"></div>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+        <h2 id="配置GPIO"><a href="#配置GPIO" class="headerlink" title="配置GPIO"></a>配置GPIO</h2><p>工程配置这里不赘述了</p>
+<a href="/2026/04/17/stm/HAL%E5%BA%93/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/" title="STM32HAL库配置">STM32HAL库配置</a>
+
+
+<p><img src="/img/stm/STM32HAL%E5%BA%93GPIO/1.webp"></p>
+<p>我们用右边图像化配置GPIO</p>
+<p><img src="/img/stm/STM32HAL%E5%BA%93GPIO/2.webp"></p>
+<p>灰色的就是没有配置的GPIO<br>假设我们要配置<code>PC13</code><br><code>GPIO_Input：是配置输入</code><br><code>GPIO_Output：是配置输出</code></p>
+<h2 id="配置GPIO输出"><a href="#配置GPIO输出" class="headerlink" title="配置GPIO输出"></a>配置GPIO输出</h2><p>我们点击<code>GPIO_Output</code></p>
+<p><img src="/img/stm/STM32HAL%E5%BA%93GPIO/3.webp"></p>
+<p>然后选择你要的GPIO<br>会发现红色框那边有几个参数可以进行配置</p>
+<table>
+<thead>
+<tr>
+<th align="left">配置大类</th>
+<th align="left">可选选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>GPIO output level（初始输出电平）</strong></td>
+<td align="left">Low<br/>High</td>
+</tr>
+<tr>
+<td align="left"><strong>GPIO mode（GPIO 输出模式，核心选型）</strong></td>
+<td align="left">Output Push Pull（推挽输出）<br/>Output Open Drain（开漏输出）</td>
+</tr>
+<tr>
+<td align="left"><strong>GPIO Pull-up&#x2F;Pull-down（上下拉电阻配置）</strong></td>
+<td align="left">No pull-up and no pull-down（无上下拉）<br/>Pull-up（上拉）<br/>Pull-down（下拉）</td>
+</tr>
+<tr>
+<td align="left"><strong>Maximum output speed（最大输出速度）</strong></td>
+<td align="left">Low（低速，通常 2MHz&#x2F;10MHz）<br/>Medium（中速，通常 10MHz&#x2F;50MHz）<br/>High（高速，通常 50MHz&#x2F;100MHz）<br/>Very High（超高速，通常 100MHz&#x2F;200MHz+）</td>
+</tr>
+<tr>
+<td align="left"><strong>User Label（用户标签）</strong></td>
+<td align="left">自定义英文 &#x2F; 下划线文本</td>
+</tr>
+</tbody></table>
+<h2 id="配置GPIO输入"><a href="#配置GPIO输入" class="headerlink" title="配置GPIO输入"></a>配置GPIO输入</h2><p>假如我们拿GPIO PB14作为按键输入<br>我们选择<code>GPIO_Input</code><br><img src="/img/stm/STM32HAL%E5%BA%93GPIO/6.webp"><br><img src="/img/stm/STM32HAL%E5%BA%93GPIO/7.webp"><br>然后选择配置的引脚，我们这边选择PB14</p>
+<table>
+<thead>
+<tr>
+<th align="left">配置项</th>
+<th align="left">可选值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>GPIO mode<br>（GPIO工作模式）</strong></td>
+<td align="left">Input mode<br>（输入模式）</td>
+</tr>
+<tr>
+<td align="left"><strong>GPIO Pull-up&#x2F;Pull-down<br>（上下拉电阻配置）</strong></td>
+<td align="left">No pull-up and no pull-down<br>（无上下拉）<br/>Pull-up<br>（上拉）<br/>Pull-down<br>（下拉）</td>
+</tr>
+<tr>
+<td align="left"><strong>User Label<br>（用户标签）</strong></td>
+<td align="left">自定义英文&#x2F;下划线文本</td>
+</tr>
+</tbody></table>
+<h2 id="工程里面如何使用"><a href="#工程里面如何使用" class="headerlink" title="工程里面如何使用"></a>工程里面如何使用</h2><p>然后我们打开输入完的工程<br><img src="/img/stm/STM32HAL%E5%BA%93GPIO/4.webp"><br>我们在main.c里面可以找到初始化GPIO的函数</p>
+<p><img src="/img/stm/STM32HAL%E5%BA%93GPIO/5.webp"><br>我们在<code>MX_GPIO_Init()</code>里面可以看到GPIO的配置信息</p>
+<h3 id="初始化时钟"><a href="#初始化时钟" class="headerlink" title="初始化时钟"></a>初始化时钟</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__HAL_RCC_GPIO-x_CLK_ENABLE()</span><br></pre></td></tr></table></figure>
+<p>-x是用来选择初始化哪组GPIO</p>
+<h3 id="初始化GPIO"><a href="#初始化GPIO" class="headerlink" title="初始化GPIO"></a>初始化GPIO</h3><p><code>GPIO_InitTypeDef GPIO_InitStruct = &#123;0&#125;</code> &#x2F;&#x2F; 定义GPIO初始化结构体，全部初始化为0，避免随机值导致配置异常</p>
+<table>
+<thead>
+<tr>
+<th align="left">配置大类</th>
+<th align="left">可选值</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>Pin（引脚选择）</strong></td>
+<td align="left">GPIO_PIN_0 ~ GPIO_PIN_15<br/>GPIO_PIN_ALL<br/>GPIO_PIN_0 | GPIO_PIN_1</td>
+<td align="left">单个引脚选择（对应 Pin0 ~ Pin15）<br/>选中端口的所有引脚<br/>多个引脚组合选择（使用或运算 <code>|</code> 连接）</td>
+</tr>
+<tr>
+<td align="left"><strong>Mode（工作模式）</strong></td>
+<td align="left">GPIO_MODE_INPUT<br/>GPIO_MODE_OUTPUT_PP<br/>GPIO_MODE_OUTPUT_OD<br/>GPIO_MODE_AF_PP<br/>GPIO_MODE_AF_OD<br/>GPIO_MODE_ANALOG</td>
+<td align="left">输入模式（用于检测外部电平，如按键）<br/>推挽输出（用于输出高低电平，如LED）<br/>开漏输出（需外接上拉电阻，可用于电平转换等）<br/>复用推挽输出（用于外设复用，如UART_TX、SPI_MOSI）<br/>复用开漏输出（用于外设复用，如I2C_SCL、I2C_SDA）<br/>模拟模式（用于ADC采集、DAC输出等模拟信号场景）</td>
+</tr>
+<tr>
+<td align="left"><strong>Pull（上下拉配置）</strong></td>
+<td align="left">GPIO_NOPULL<br/>GPIO_PULLUP<br/>GPIO_PULLDOWN</td>
+<td align="left">无上下拉（浮空状态，输入模式下需外部接上下拉电阻避免干扰）<br/>上拉（引脚默认拉至高电平）<br/>下拉（引脚默认拉至低电平）</td>
+</tr>
+<tr>
+<td align="left"><strong>Speed（输出速度）</strong></td>
+<td align="left">GPIO_SPEED_FREQ_LOW<br/>GPIO_SPEED_FREQ_MEDIUM<br/>GPIO_SPEED_FREQ_HIGH<br/>GPIO_SPEED_FREQ_VERY_HIGH</td>
+<td align="left">低速（最大约2MHz，适合LED、普通按键等低速场景）<br/>中速（最大约10MHz，适合一般数字信号、普通外设通信）<br/>高速（最大约50MHz，适合高速外设复用、PWM输出等）<br/>超高速（最大约100MHz，仅高端型号如F4&#x2F;F7&#x2F;H7系列支持，用于高速并口等极限场景）</td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HAL_GPIO_Init(GPIO-X, &amp;GPIO_InitStruct);    //初始化所设置的引脚</span><br></pre></td></tr></table></figure>
+<p>-X是初始化引脚组为ABCD等组<br>GPIO_InitStruct 是结构体<br>用于初始化</p>
+<h2 id="使用的函数"><a href="#使用的函数" class="headerlink" title="使用的函数"></a>使用的函数</h2><h3 id="设置电平"><a href="#设置电平" class="headerlink" title="设置电平"></a>设置电平</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">void HAL_GPIO_WritePin(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin, GPIO_PinState PinState);</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">参数</th>
+<th align="left">含义</th>
+<th align="left">可选值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>GPIOx</strong></td>
+<td align="left">引脚所属端口</td>
+<td align="left"><code>GPIOA</code>、<code>GPIOB</code>、<code>GPIOC</code> 等</td>
+</tr>
+<tr>
+<td align="left"><strong>GPIO_Pin</strong></td>
+<td align="left">引脚编号</td>
+<td align="left"><code>GPIO_PIN_0</code> ~ <code>GPIO_PIN_15</code></td>
+</tr>
+<tr>
+<td align="left"><strong>PinState</strong></td>
+<td align="left">输出电平</td>
+<td align="left"><code>GPIO_PIN_SET</code> &#x3D; 高电平<br><code>GPIO_PIN_RESET</code> &#x3D; 低电平</td>
+</tr>
+</tbody></table>
+<h3 id="电平翻转"><a href="#电平翻转" class="headerlink" title="电平翻转"></a>电平翻转</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">void HAL_GPIO_TogglePin(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin);</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">参数</th>
+<th align="left">含义</th>
+<th align="left">可选值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>GPIOx</strong></td>
+<td align="left">引脚所属端口</td>
+<td align="left"><code>GPIOA</code>、<code>GPIOB</code>、<code>GPIOC</code> 等</td>
+</tr>
+<tr>
+<td align="left"><strong>GPIO_Pin</strong></td>
+<td align="left">引脚编号</td>
+<td align="left"><code>GPIO_PIN_0</code> ~ <code>GPIO_PIN_15</code></td>
+</tr>
+</tbody></table>
+<h3 id="读取电平"><a href="#读取电平" class="headerlink" title="读取电平"></a>读取电平</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GPIO_PinState HAL_GPIO_ReadPin(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin);</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">项目</th>
+<th align="left">说明</th>
+<th align="left">可选值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>参数 1：GPIOx</strong></td>
+<td align="left">引脚所属端口</td>
+<td align="left"><code>GPIOA</code>、<code>GPIOB</code>、<code>GPIOC</code>、<code>GPIOD</code> 等（对应芯片实际端口）</td>
+</tr>
+<tr>
+<td align="left"><strong>参数 2：GPIO_Pin</strong></td>
+<td align="left">引脚编号</td>
+<td align="left"><code>GPIO_PIN_0</code> ~ <code>GPIO_PIN_15</code></td>
+</tr>
+<tr>
+<td align="left"><strong>返回值：GPIO_PinState</strong></td>
+<td align="left">读取到的引脚电平</td>
+<td align="left"><code>GPIO_PIN_SET</code> &#x3D; 高电平<br><code>GPIO_PIN_RESET</code> &#x3D; 低电平</td>
+</tr>
+</tbody></table>
+<h3 id="延迟"><a href="#延迟" class="headerlink" title="延迟"></a>延迟</h3><p>HAL里面他自带了延迟函数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__weak void HAL_Delay(__IO uint32_t Delay)</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，HAL_Delay()是一个虚函数，这表明用户可以在其它的位置重定义，如果这样，新的函数将会取代它，编译过程中也不会出现重定义的错误。该函数只有一个32位的参数，明显的，这个形参指定了延时的时间，它的单位是毫秒(ms)。</p>
+<p><code>HAL_Delay</code>依赖SysTick系统滴答定时器实现不能在中断里面使用</p>
+<table>
+<thead>
+<tr>
+<th align="left">项目</th>
+<th align="left">说明</th>
+<th align="left">可选值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">__IO uint32_t Delay</td>
+<td align="left">输入要延迟的ms</td>
+<td align="left">延时的毫秒数</td>
+</tr>
+</tbody></table>
+
+    </div>
+    <footer class="article-footer">
+        <a class="article-category-link" href="/categories/STM32/" title="STM32" data-aos="zoom-in">STM32</a>
+
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="/tags/STM32/" rel="tag" title="STM32">STM32</a></li></ul>
+
+    </footer>
+  </div>
+    <nav id="article-nav" aria-label="Article navigation" data-aos="fade-up">
+    <div class="article-nav-link-wrap right">
+          <img data-src="/covers/3.webp" data-sizes="auto" alt="STM32HAL库配置" class="lazyload">
+      <a href="/2026/04/17/stm/HAL%E5%BA%93/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/" aria-label="后一篇: STM32HAL库配置"  title="后一篇: STM32HAL库配置"></a>
+      <div class="article-nav-caption">后一篇</div>
+      <h3 class="article-nav-title">
+          STM32HAL库配置
+      </h3>
+    </div>
+  </nav>
+
+</article>
+
+
+</section>
+        </div>
+        <footer id="footer" aria-label="Site footer">
+  <div style="width: 100%; overflow: hidden">
+    <div class="footer-line"></div>
+  </div>
+  <div id="footer-info">
+    <div>
+      <span class="icon-copyright"></span>
+        2020-2026
+        <span class="footer-info-sep rotate"></span>
+      HiW
+    </div>
+  </div>
+</footer>
+
+          <div class="sidebar-top">
+            <div class="sidebar-top-taichi rotate"></div>
+            <div class="arrow-up"></div>
+          </div>
+        <div id="mask" class="hide"></div>
+      </div>
+      <nav id="mobile-nav" aria-label="Mobile navigation">
+  <div class="sidebar-wrap">
+        <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEGPIO"><span class="toc-number">1.</span> <span class="toc-text">配置GPIO</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEGPIO%E8%BE%93%E5%87%BA"><span class="toc-number">2.</span> <span class="toc-text">配置GPIO输出</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEGPIO%E8%BE%93%E5%85%A5"><span class="toc-number">3.</span> <span class="toc-text">配置GPIO输入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E7%A8%8B%E9%87%8C%E9%9D%A2%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8"><span class="toc-number">4.</span> <span class="toc-text">工程里面如何使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%97%B6%E9%92%9F"><span class="toc-number">4.1.</span> <span class="toc-text">初始化时钟</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96GPIO"><span class="toc-number">4.2.</span> <span class="toc-text">初始化GPIO</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E7%9A%84%E5%87%BD%E6%95%B0"><span class="toc-number">5.</span> <span class="toc-text">使用的函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AE%E7%94%B5%E5%B9%B3"><span class="toc-number">5.1.</span> <span class="toc-text">设置电平</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%B5%E5%B9%B3%E7%BF%BB%E8%BD%AC"><span class="toc-number">5.2.</span> <span class="toc-text">电平翻转</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E7%94%B5%E5%B9%B3"><span class="toc-number">5.3.</span> <span class="toc-text">读取电平</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BB%B6%E8%BF%9F"><span class="toc-number">5.4.</span> <span class="toc-text">延迟</span></a></li></ol></li></ol>
+</div>
+</div>
+        <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="HiW" class="lazyload">
+  <div class="sidebar-author-name">HiW</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">61</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">10</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">15</div>
+  </div>
+</div>
+<div class="sidebar-social" >
+</div>
+<div class="sidebar-menu">
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="首页"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xe3af;
+          </div>
+        <div class="sidebar-menu-link">首页</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf187;
+          </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/about" aria-label="关于"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf05a;
+          </div>
+        <div class="sidebar-menu-link">关于</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf500;
+          </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+</div>
+</div>
+  </div>
+      <div class="sidebar-btn-wrapper">
+        <div class="sidebar-toc-btn current"></div>
+        <div class="sidebar-common-btn"></div>
+      </div>
+</nav>
+
+    </div>
+      <div class="site-search">
+        <div class="reimu-popup popup">
+          <div class="reimu-search">
+            <div class="reimu-search-input-icon"></div>
+            <div id="reimu-search-input"></div>
+            <div class="popup-btn-close"></div>
+          </div>
+          <div class="reimu-results">
+            <div id="reimu-stats"></div>
+            <div id="reimu-hits"></div>
+            <div id="reimu-pagination" class="reimu-pagination"></div>
+          </div>
+          <img class="reimu-bg" src="/images/reimu.png" loading="lazy" decoding="async" fetchpriority="low"/>
+        </div>
+      </div>
+    
+<script src="https://npm.webcache.cn/lazysizes@5.3.2/lazysizes.min.js" integrity="sha384-3gT&#x2F;vsepWkfz&#x2F;ff7PpWNUeMzeWoH3cDhm&#x2F;A8jM7ouoAK0&#x2F;fP&#x2F;9bcHHR5kHq2nf+e" crossorigin="anonymous"></script>
+
+
+<script src="https://npm.webcache.cn/clipboard@2.0.11/dist/clipboard.min.js" integrity="sha384-J08i8An&#x2F;QeARD9ExYpvphB8BsyOj3Gh2TSh1aLINKO3L0cMSH2dN3E22zFoXEi0Q" crossorigin="anonymous"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+  
+<script src="/js/aos.js"></script>
+
+  <script>
+    var aosInit = () => {
+      AOS.init({
+        duration: 1000,
+        easing: "ease",
+        once: true,
+        offset: 50,
+      });
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', aosInit);
+    } else {
+      aosInit();
+    }
+  </script>
+
+
+<script src="/js/pjax_script.js" data-pjax></script>
+
+
+
+  <script>
+    var ALGOLIA_CONFIG = {
+      logo: "/images/algolia_logo.svg",
+      algolia: {
+        applicationID: "29NDGCSMY6",
+        apiKey: "6d330d43eefc2a0de625b8b431bcb121",
+        indexName: "binging",
+        hits: {
+          "per_page": parseInt("10")
+        },
+        labels: {
+          "input_placeholder": "搜索.....",
+          "hits_empty": "未发现与 「${query}」相关内容",
+          "hits_stats": "找到${hits}条结果（用时 ${time} ms）"
+        }
+      }
+    };
+  </script>
+  
+<script src="https://npm.webcache.cn/algoliasearch@4.17.1/dist/algoliasearch-lite.umd.js" integrity="sha384-xvLS0jfKuoREs7pqkRI&#x2F;OI8GcqohO5S+jQz7ZBtQXnsXmD+9jDOOY4cL6dCPzlrk" crossorigin="anonymous" defer></script>
+
+  
+<script src="https://npm.webcache.cn/@reimujs/instantsearch.js@4.57.0-beta.1/dist/instantsearch.production.min.js" integrity="sha384-aagKMe8nkqaP2DYQc8kkYOL5l+M5Q2WH&#x2F;Uhr4teOh0Ybp0RZj0kUSDm45qPikMjK" crossorigin="anonymous" defer></script>
+
+  
+<script src="/js/algolia_search.js" defer></script>
+
+
+  <script>
+    var setupFirework = () => {
+      if (!false || !window.matchMedia('(max-width: 768px)').matches) {
+        window.firework && window.firework(JSON.parse('{"excludeElements":["a","button"],"particles":[{"shape":"circle","move":["emit"],"easing":"easeOutExpo","colors":["var(--red-1)","var(--red-2)","var(--red-3)","var(--red-4)"],"number":20,"duration":[1200,1800],"shapeOptions":{"radius":[16,32],"alpha":[0.3,0.5]}},{"shape":"circle","move":["diffuse"],"easing":"easeOutExpo","colors":["var(--red-0)"],"number":1,"duration":[1200,1800],"shapeOptions":{"radius":20,"alpha":[0.2,0.5],"lineWidth":6}}]}'));
+      }
+    }
+  </script>
+  
+<script src="https://npm.webcache.cn/mouse-firework@0.2.0/dist/index.umd.js" integrity="sha384-qi9WggRt19tv8Vc7pCHW3ulMNLwrn515zaLEWZjl1px07vz8+pUoWX8n1rgq282T" crossorigin="anonymous" onload="setupFirework()" defer></script>
+
+
+
+
+
+
+<div id="lazy-script">
+  <div>
+      
+      
+      <script data-pjax>
+        window.REIMU_POST = {
+          author: "HiW",
+          title: "STM32HAL库GPIO",
+          url: "https://binging.top/2026/04/20/stm/HAL%E5%BA%93/STM32HAL%E5%BA%93GPIO/",
+          excerpt: "",
+          description: "",
+          stripContent: "配置GPIO工程配置这里不赘述了 STM32HAL库配置    我们用右边图像化配置GPIO  灰色的就是没有配置的GPIO假设我们要配置PC13GPIO_Input：是配置输入GPIO_Output：是配置输出 配置GPIO输出我们点击GPIO_Output  然后选择你要的GPIO会发现红色框那边有几个参数可以进行配置    配置大类 可选选项    GPIO output level（初始输出电平） LowHigh   GPIO mode（GPIO 输出模式，核心选型） Output Pu",
+          date: "Mon Apr 20 2026 12:00:00 GMT+0800",
+          updated: "Mon Apr 20 2026 16:47:00 GMT+0800",
+          cover: "/images/banner.webp",
+        };
+      </script>
+        
+<script src="/js/insert_highlight.js" data-pjax></script>
+
+      
+<script src="/js/tabs.js" data-pjax defer></script>
+
+      <script type="module" data-pjax>
+        (async () => {
+          const PhotoSwipeLightbox = (await safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.min.js", "sha384-DiL6M/gG+wmTxmCRZyD1zee6lIhawn5TGvED0FOh7fXcN9B0aZ9dexSF/N6lrZi/")).default;
+          const initPswp = (gallery, children) => {
+            if (_$$(`${gallery} ${children}`).length > 0) {
+              new PhotoSwipeLightbox({
+                gallery,
+                children,
+                pswpModule: () => safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.esm.min.js", "sha384-WkkO3GCmgkC3VQWpaV8DqhKJqpzpF9JoByxDmnV8+oTJ7m3DfYEWX1fu1scuS4+s")
+              }).init();
+            }
+          }
+          const pswp = () => {
+            initPswp('.article-entry', 'a.article-gallery-item');
+            initPswp('.article-gallery', 'a.article-gallery-item');
+          }
+          pswp();
+        })();
+      </script>
+        
+
+
+  </div>
+</div>
+
+
+  <script>
+    console.log(String.raw`%c 
+ ______     ______     __     __    __     __  __    
+/\  == \   /\  ___\   /\ \   /\ "-./  \   /\ \/\ \   
+\ \  __<   \ \  __\   \ \ \  \ \ \-./\ \  \ \ \_\ \  
+ \ \_\ \_\  \ \_____\  \ \_\  \ \_\ \ \_\  \ \_____\ 
+  \/_/ /_/   \/_____/   \/_/   \/_/  \/_/   \/_____/ 
+                                                  
+`,'color: #ff5252;')
+    console.log('%c Theme.Reimu v' + '1.12.3' + ' %c https://github.com/D-Sketon/hexo-theme-reimu ', 'color: white; background: #ff5252; padding:5px 0;', 'padding:4px;border:1px solid #ff5252;')
+  </script>
+  
+
+
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
+</script>
+
+
+
+
+  </body>
+  </html>

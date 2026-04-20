@@ -1,0 +1,739 @@
+  <!DOCTYPE html>
+  <html lang="zh-CN"  
+      data-theme-mode="auto"
+  >
+  <head>
+  <meta charset="utf-8">
+  
+  
+  
+  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN":"复制成功 (*^▽^*)"},"fail":{"zh-CN":"复制失败 (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'https://binging.top';</script>
+  <title>
+    STM32标准库UART | Binging
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic|Noto Serif SC:400,400italic,700,700italic&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic|Noto Serif SC:400,400italic,700,700italic&display=swap" media="print" onload="this.media='all'">
+    
+<link rel="stylesheet" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/regular.min.css" integrity="sha384-4qYppzjH8EiA+cGdaubu2vL7Rk8WGiqCSj7oRuP1uwtFWkfKNHD20lPfcrbQc8dU" crossorigin="anonymous">
+<link rel="stylesheet" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/solid.min.css" integrity="sha384-wbMWab3UDSPm2kvIgVOn&#x2F;d9KPTecgPU1+Nb3zoQrm&#x2F;oVu0EkPL6IaKinjbwW0rum" crossorigin="anonymous">
+
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/brands.min.css" integrity="sha384-KTGeC2hIMzpeQakhsmzB9bZfhCD5xZZCgI1iZH6f/O457SxzlkzTQg/WXFNoi3ih" crossorigin="anonymous">
+<link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/v5-font-face.min.css" integrity="sha384-nJ1ThfldViXoLpJ6jlKcP2beas8BMbYq26SG9Hi8cH89bZi4RZ644v7helMCqJxd" crossorigin="anonymous">
+<link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/v4-font-face.min.css" integrity="sha384-UlkrhOIvZxJFd4MElSUp7ow6/RUeYKi/orfCZIRRiOENFuQPIAA3T3HjYfmBRhNq" crossorigin="anonymous">
+    
+<link rel="stylesheet" href="/css/loader.css">
+
+    <meta name="description" content="关于UART UART是一种全双工，异步，点对点的通讯协议他主要靠设备之间互相约定传输频率没有固定的时钟信号来确认同步而且设备之间没有明确的主从之分连接最少只要3个线TX  —  RXRX  —  TXGND — GND	设备自己解决供电问题就可以通讯了 参考代码   串口外设 TX 引脚 RX 引脚 RTS 引脚 CTS 引脚 备注    USART1 PA9 PA10 PA12 PA11 最常">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STM32标准库UART">
+<meta property="og:url" content="https://binging.top/2026/04/14/stm/%E6%A0%87%E5%87%86%E5%BA%93/STM%E6%A0%87%E5%87%86%E5%BA%93UART/index.html">
+<meta property="og:site_name" content="Binging">
+<meta property="og:description" content="关于UART UART是一种全双工，异步，点对点的通讯协议他主要靠设备之间互相约定传输频率没有固定的时钟信号来确认同步而且设备之间没有明确的主从之分连接最少只要3个线TX  —  RXRX  —  TXGND — GND	设备自己解决供电问题就可以通讯了 参考代码   串口外设 TX 引脚 RX 引脚 RTS 引脚 CTS 引脚 备注    USART1 PA9 PA10 PA12 PA11 最常">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93UART/1.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93UART/2.webp">
+<meta property="article:published_time" content="2026-04-14T09:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-14T13:04:17.627Z">
+<meta property="article:author" content="HiW">
+<meta property="article:tag" content="STM32">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93UART/1.webp">
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.css" integrity="sha384-IfxC36XL/toUyJ939C73PcgMuRzAZuIzZxE38drsmO5p6jD7ei+Zx/1oA/0l8ysE" crossorigin="anonymous">
+    
+<script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous"></script>
+
+    
+<link rel="stylesheet" href="https://npm.webcache.cn/@reimujs/aos@0.1.2/dist/aos.css" integrity="sha384-GMRP93c6Hkz9JVKGAuRR3nTS7M07RwPgTFenXiosjq2VbVgvdDNcz1g6Mkj8AONa" crossorigin="anonymous">
+
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+  <body>
+      <div id='loader'>
+    <div class="loading-left-bg loading-bg"></div>
+    <div class="loading-right-bg loading-bg"></div>
+    <div class="spinner-box">
+      <div class="loading-taichi rotate">
+          <svg width="150" height="150" viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="https://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+            <path d="M303.5 432A80 80 0 0 1 291.5 592A80 80 0 0 1 303.5 432z" fill="var(--red-1, #ff5252)" />
+            <path d="M512 65A447 447 0 0 1 512 959L512 929A417 417 0 0 0 512 95A417 417 0 0 0 512 929L512 959A447 447 0 0 1 512 65z 
+           M512 95A417 417 0 0 1 929 512A208.5 208.5 0 0 1 720.5 720.5L720.5 592A80 80 0 0 0 720.5 432A80 80 0 0 0 720.5 592L720.5 720.5A208.5 208.5 0 0 1 512 512A208.5 208.5 0 0 0 303.5 303.5A208.5 208.5 0 0 0 95 512A417 417 0 0 1 512 95z" fill="var(--red-1, #ff5252)" />
+          </svg>
+      </div>
+      <div class="loading-word">少女祈祷中...</div>
+    </div>
+  </div>
+  <script>
+    var time = null;
+    var loaderEl = document.getElementById('loader');
+    var startLoading = () => {
+      time = Date.now();
+      loaderEl.classList.remove("loading");
+    }
+    var hideLoader = () => {
+      document.body.style.overflow = 'auto';
+      loader.classList.add('loading');
+    };
+
+    var endLoading = () => {
+      if (!time) {
+        hideLoader();
+      } else {
+        if (Date.now() - time > 500) {
+          time = null;
+          hideLoader();
+        } else {
+          setTimeout(endLoading, 500 - (Date.now() - time));
+          time = null;
+        }
+      }
+    }
+    window.addEventListener('DOMContentLoaded', endLoading);
+    loaderEl.addEventListener('click', endLoading);
+  </script>
+<div id="copy-tooltip"></div>
+<div id="heatmap-tooltip"></div>
+
+
+    <div id="container">
+      <div id="wrap">
+        <div id="header-nav">
+  <nav id="main-nav" aria-label="Primary navigation">
+        <a class="main-nav-link-wrap" href="/">
+            <div class="main-nav-icon icon ">
+                  &#xe3af;
+            </div>
+          <span class="main-nav-link">首页</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/archives">
+            <div class="main-nav-icon icon ">
+                  &#xf187;
+            </div>
+          <span class="main-nav-link">归档</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/about">
+            <div class="main-nav-icon icon ">
+                  &#xf05a;
+            </div>
+          <span class="main-nav-link">关于</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/friend">
+            <div class="main-nav-icon icon ">
+                  &#xf500;
+            </div>
+          <span class="main-nav-link">友链</span>
+        </a>
+    <a id="main-nav-toggle" class="nav-icon" aria-label="Toggle navigation" role="button"></a>
+  </nav>
+  <nav id="sub-nav" aria-label="Secondary navigation">
+      <a id="nav-search-btn" class="nav-icon popup-trigger" title="搜索" aria-label="搜索"></a>
+  </nav>
+</div>
+<header id="header" aria-label="Site header">
+        <picture>
+        </picture>
+          <img  fetchpriority="high" src="/images/banner.webp" alt="STM32标准库UART">
+  <div id="header-outer">
+    <div id="header-title">
+          <span id="logo">
+            <h1 data-aos="slide-up">STM32标准库UART</h1>
+          </span>
+        <h2 id="subtitle-wrap" data-aos="slide-down">
+        </h2>
+    </div>
+  </div>
+</header>
+
+        <div id="content" aria-label="Page content"  class="sidebar-right" >
+          <aside id="sidebar" aria-label="Sidebar">
+  <div class="sidebar-wrapper-container sticky">
+  <div class="sidebar-wrapper">
+    <div class="sidebar-wrap" data-aos="fade-up">
+          <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E4%BA%8EUART"><span class="toc-number">1.</span> <span class="toc-text">关于UART</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E4%BB%A3%E7%A0%81"><span class="toc-number">2.</span> <span class="toc-text">参考代码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%B2%E5%8F%A3"><span class="toc-number">2.1.</span> <span class="toc-text">初始化串口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%90%AF%E4%B8%B2%E5%8F%A3"><span class="toc-number">2.2.</span> <span class="toc-text">开启串口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%91%E9%80%81%E6%95%B0%E6%8D%AE"><span class="toc-number">2.3.</span> <span class="toc-text">发送数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A5%E5%8F%97%E6%95%B0%E6%8D%AE"><span class="toc-number">2.4.</span> <span class="toc-text">接受数据</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RS232%E3%80%81RS422%E3%80%81RS485%E5%AE%9A%E4%B9%89"><span class="toc-number">3.</span> <span class="toc-text">RS232、RS422、RS485定义</span></a></li></ol>
+</div>
+</div>
+          <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="HiW" class="lazyload">
+  <div class="sidebar-author-name">HiW</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">61</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">10</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">15</div>
+  </div>
+</div>
+<div class="sidebar-social" >
+</div>
+<div class="sidebar-menu">
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="首页"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xe3af;
+          </div>
+        <div class="sidebar-menu-link">首页</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf187;
+          </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/about" aria-label="关于"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf05a;
+          </div>
+        <div class="sidebar-menu-link">关于</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf500;
+          </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+</div>
+</div>
+          <div class="sidebar-btn-wrapper" style="position:static">
+            <div class="sidebar-toc-btn current"></div>
+            <div class="sidebar-common-btn"></div>
+          </div>
+    </div>
+  </div>
+  <div class="sidebar-widget">
+  </div>
+  </div>
+</aside>
+
+          <section id="main" aria-label="Main content"><article id="post-stm/标准库/STM标准库UART" class="h-entry article" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner" data-aos="fade-up">
+    <div class="article-meta">
+      <div class="article-date">
+  <span class="article-date-link icon-calendar" data-aos="zoom-in">
+    <time datetime="2026-04-14T09:00:00.000Z" itemprop="datePublished">2026-04-14</time>
+    <time style="display: none;" id="post-update-time">2026-04-14</time>
+  </span>
+</div>
+
+    </div>
+    
+    <div class="hr-line"></div>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+        <h2 id="关于UART"><a href="#关于UART" class="headerlink" title="关于UART"></a>关于UART</h2><p><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93UART/1.webp"></p>
+<p>UART是一种全双工，异步，点对点的通讯协议<br>他主要靠设备之间互相约定传输频率没有固定的时钟信号来确认同步<br>而且设备之间没有明确的主从之分<br>连接最少只要3个线<br>TX  —  RX<br>RX  —  TX<br>GND — GND	<br>设备自己解决供电问题就可以通讯了</p>
+<h2 id="参考代码"><a href="#参考代码" class="headerlink" title="参考代码"></a>参考代码</h2><table>
+<thead>
+<tr>
+<th>串口外设</th>
+<th>TX 引脚</th>
+<th>RX 引脚</th>
+<th>RTS 引脚</th>
+<th>CTS 引脚</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>USART1</td>
+<td>PA9</td>
+<td>PA10</td>
+<td>PA12</td>
+<td>PA11</td>
+<td>最常用，挂载 APB2 高速总线，支持硬件流控</td>
+</tr>
+<tr>
+<td>USART2</td>
+<td>PA2</td>
+<td>PA3</td>
+<td>PA1</td>
+<td>PA0</td>
+<td>挂载 APB1 低速总线，支持硬件流控</td>
+</tr>
+<tr>
+<td>USART3</td>
+<td>PB10</td>
+<td>PB11</td>
+<td>PB14</td>
+<td>PB13</td>
+<td>挂载 APB1 低速总线，支持硬件流控</td>
+</tr>
+<tr>
+<td>UART4</td>
+<td>PC10</td>
+<td>PC11</td>
+<td>-</td>
+<td>-</td>
+<td>仅异步，大容量型号支持，<strong>无硬件流控</strong></td>
+</tr>
+<tr>
+<td>UART5</td>
+<td>PC12</td>
+<td>PD2</td>
+<td>-</td>
+<td>-</td>
+<td>仅异步，大容量型号支持，<strong>无硬件流控</strong></td>
+</tr>
+</tbody></table>
+<h3 id="初始化串口"><a href="#初始化串口" class="headerlink" title="初始化串口"></a>初始化串口</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">void USART_Init(USART_TypeDef* USARTx, USART_InitTypeDef* USART_InitStruct)</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>USART_TypeDef* USARTx</td>
+<td>—</td>
+<td>选择串口组</td>
+<td>USART1<br/>···<br/>USART5</td>
+</tr>
+<tr>
+<td>USART_InitTypeDef* USART_InitStruct</td>
+<td>结构体</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>无</td>
+<td>无</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>结构体成员</th>
+<th>含义</th>
+<th>常用可选值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>USART_BaudRate</code></td>
+<td>波特率</td>
+<td>任意正整数（如 <code>115200</code>、<code>9600</code>）</td>
+</tr>
+<tr>
+<td><code>USART_WordLength</code></td>
+<td>数据位长度</td>
+<td><code>USART_WordLength_8b</code>（8 位，常用）<br><code>USART_WordLength_9b</code>（9 位）</td>
+</tr>
+<tr>
+<td><code>USART_StopBits</code></td>
+<td>停止位个数</td>
+<td><code>USART_StopBits_1</code>（1 位，常用）<br><code>USART_StopBits_2</code>（2 位）</td>
+</tr>
+<tr>
+<td><code>USART_Parity</code></td>
+<td>校验位</td>
+<td><code>USART_Parity_No</code>（无校验，常用）<br><code>USART_Parity_Even</code>（偶校验）<br><code>USART_Parity_Odd</code>（奇校验）</td>
+</tr>
+<tr>
+<td><code>USART_Mode</code></td>
+<td>串口工作模式</td>
+<td><code>USART_Mode_Tx</code>（仅发送）<br><code>USART_Mode_Rx</code>（仅接收）<br><code>USART_Mode_Tx | USART_Mode_Rx</code>（收发一体，常用）</td>
+</tr>
+<tr>
+<td><code>USART_HardwareFlowControl</code></td>
+<td>硬件流控</td>
+<td>（无流控，常用）<br>USART_HardwareFlowControl_None<br>（硬件流控相当多了CTS和RTS引脚）<br> USART_HardwareFlowControl_RTS<br>USART_HardwareFlowControl_CTS<br>USART_HardwareFlowControl_RTS_CTS</td>
+</tr>
+</tbody></table>
+<h3 id="开启串口"><a href="#开启串口" class="headerlink" title="开启串口"></a>开启串口</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">void USART_Cmd(USART_TypeDef* USARTx, FunctionalState NewState)</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>USART_TypeDef* USARTx</td>
+<td>—</td>
+<td>选择串口组</td>
+<td>USART1<br/>···<br/>USART5</td>
+</tr>
+<tr>
+<td>FunctionalState NewState</td>
+<td>—</td>
+<td>ENABLE<br>DISABLE</td>
+<td>开启或关闭</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>无</td>
+<td>无</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<h3 id="发送数据"><a href="#发送数据" class="headerlink" title="发送数据"></a>发送数据</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">void USART_SendData(USART_TypeDef* USARTx, uint16_t Data)</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>USART_TypeDef* USARTx</td>
+<td>—</td>
+<td>选择串口组</td>
+<td>USART1<br/>···<br/>USART5</td>
+</tr>
+<tr>
+<td>uint16_t Data</td>
+<td>uint16_t</td>
+<td>发送数据包</td>
+<td>0x0000 - 0xFFFF（若配置为 8 位数据字长，<br/>实际有效数据为低 8 位，范围 <code>0x00 - 0xFF</code>）</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>无</td>
+<td>无</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<h3 id="接受数据"><a href="#接受数据" class="headerlink" title="接受数据"></a>接受数据</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uint16_t USART_ReceiveData(USART_TypeDef* USARTx)</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>USART_TypeDef* USARTx</td>
+<td>—</td>
+<td>选择串口组</td>
+<td>USART1<br/>···<br/>USART5</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>uint16_t</td>
+<td>接收数据包</td>
+<td>0x0000 - 0xFFFF（若配置为 8 位数据字长，<br/>实际有效数据为低 8 位，范围 <code>0x00 - 0xFF</code>）</td>
+</tr>
+</tbody></table>
+<h2 id="RS232、RS422、RS485定义"><a href="#RS232、RS422、RS485定义" class="headerlink" title="RS232、RS422、RS485定义"></a>RS232、RS422、RS485定义</h2><p>RS232：点对点、全双工、距离短、抗干扰弱<br>RS422：差分传输、全双工、距离远、只能 1 发多收<br>RS485：差分传输、半双工、距离远、支持多机联网（工业最常用）</p>
+<p><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93UART/2.webp"></p>
+
+    </div>
+    <footer class="article-footer">
+        <a class="article-category-link" href="/categories/STM32/" title="STM32" data-aos="zoom-in">STM32</a>
+
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="/tags/STM32/" rel="tag" title="STM32">STM32</a></li></ul>
+
+    </footer>
+  </div>
+    <nav id="article-nav" aria-label="Article navigation" data-aos="fade-up">
+      <div class="article-nav-link-wrap left">
+            <img data-src="/covers/1.webp" data-sizes="auto" alt="STM32HAL库配置" class="lazyload">
+        <a href="/2026/04/17/stm/HAL%E5%BA%93/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/" aria-label="前一篇: STM32HAL库配置" title="前一篇: STM32HAL库配置"></a>
+        <div class="article-nav-caption">前一篇</div>
+        <h3 class="article-nav-title">
+            STM32HAL库配置
+        </h3>
+      </div>
+    <div class="article-nav-link-wrap right">
+          <img data-src="/covers/2.webp" data-sizes="auto" alt="STM32标准库ADC" class="lazyload">
+      <a href="/2026/04/14/stm/%E6%A0%87%E5%87%86%E5%BA%93/STM32%E6%A0%87%E5%87%86%E5%BA%93ADC/" aria-label="后一篇: STM32标准库ADC"  title="后一篇: STM32标准库ADC"></a>
+      <div class="article-nav-caption">后一篇</div>
+      <h3 class="article-nav-title">
+          STM32标准库ADC
+      </h3>
+    </div>
+  </nav>
+
+</article>
+
+
+</section>
+        </div>
+        <footer id="footer" aria-label="Site footer">
+  <div style="width: 100%; overflow: hidden">
+    <div class="footer-line"></div>
+  </div>
+  <div id="footer-info">
+    <div>
+      <span class="icon-copyright"></span>
+        2020-2026
+        <span class="footer-info-sep rotate"></span>
+      HiW
+    </div>
+  </div>
+</footer>
+
+          <div class="sidebar-top">
+            <div class="sidebar-top-taichi rotate"></div>
+            <div class="arrow-up"></div>
+          </div>
+        <div id="mask" class="hide"></div>
+      </div>
+      <nav id="mobile-nav" aria-label="Mobile navigation">
+  <div class="sidebar-wrap">
+        <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E4%BA%8EUART"><span class="toc-number">1.</span> <span class="toc-text">关于UART</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E4%BB%A3%E7%A0%81"><span class="toc-number">2.</span> <span class="toc-text">参考代码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%B2%E5%8F%A3"><span class="toc-number">2.1.</span> <span class="toc-text">初始化串口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%90%AF%E4%B8%B2%E5%8F%A3"><span class="toc-number">2.2.</span> <span class="toc-text">开启串口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%91%E9%80%81%E6%95%B0%E6%8D%AE"><span class="toc-number">2.3.</span> <span class="toc-text">发送数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A5%E5%8F%97%E6%95%B0%E6%8D%AE"><span class="toc-number">2.4.</span> <span class="toc-text">接受数据</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RS232%E3%80%81RS422%E3%80%81RS485%E5%AE%9A%E4%B9%89"><span class="toc-number">3.</span> <span class="toc-text">RS232、RS422、RS485定义</span></a></li></ol>
+</div>
+</div>
+        <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="HiW" class="lazyload">
+  <div class="sidebar-author-name">HiW</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">61</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">10</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">15</div>
+  </div>
+</div>
+<div class="sidebar-social" >
+</div>
+<div class="sidebar-menu">
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="首页"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xe3af;
+          </div>
+        <div class="sidebar-menu-link">首页</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf187;
+          </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/about" aria-label="关于"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf05a;
+          </div>
+        <div class="sidebar-menu-link">关于</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf500;
+          </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+</div>
+</div>
+  </div>
+      <div class="sidebar-btn-wrapper">
+        <div class="sidebar-toc-btn current"></div>
+        <div class="sidebar-common-btn"></div>
+      </div>
+</nav>
+
+    </div>
+      <div class="site-search">
+        <div class="reimu-popup popup">
+          <div class="reimu-search">
+            <div class="reimu-search-input-icon"></div>
+            <div id="reimu-search-input"></div>
+            <div class="popup-btn-close"></div>
+          </div>
+          <div class="reimu-results">
+            <div id="reimu-stats"></div>
+            <div id="reimu-hits"></div>
+            <div id="reimu-pagination" class="reimu-pagination"></div>
+          </div>
+          <img class="reimu-bg" src="/images/reimu.png" loading="lazy" decoding="async" fetchpriority="low"/>
+        </div>
+      </div>
+    
+<script src="https://npm.webcache.cn/lazysizes@5.3.2/lazysizes.min.js" integrity="sha384-3gT&#x2F;vsepWkfz&#x2F;ff7PpWNUeMzeWoH3cDhm&#x2F;A8jM7ouoAK0&#x2F;fP&#x2F;9bcHHR5kHq2nf+e" crossorigin="anonymous"></script>
+
+
+<script src="https://npm.webcache.cn/clipboard@2.0.11/dist/clipboard.min.js" integrity="sha384-J08i8An&#x2F;QeARD9ExYpvphB8BsyOj3Gh2TSh1aLINKO3L0cMSH2dN3E22zFoXEi0Q" crossorigin="anonymous"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+  
+<script src="/js/aos.js"></script>
+
+  <script>
+    var aosInit = () => {
+      AOS.init({
+        duration: 1000,
+        easing: "ease",
+        once: true,
+        offset: 50,
+      });
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', aosInit);
+    } else {
+      aosInit();
+    }
+  </script>
+
+
+<script src="/js/pjax_script.js" data-pjax></script>
+
+
+
+  <script>
+    var ALGOLIA_CONFIG = {
+      logo: "/images/algolia_logo.svg",
+      algolia: {
+        applicationID: "29NDGCSMY6",
+        apiKey: "6d330d43eefc2a0de625b8b431bcb121",
+        indexName: "binging",
+        hits: {
+          "per_page": parseInt("10")
+        },
+        labels: {
+          "input_placeholder": "搜索.....",
+          "hits_empty": "未发现与 「${query}」相关内容",
+          "hits_stats": "找到${hits}条结果（用时 ${time} ms）"
+        }
+      }
+    };
+  </script>
+  
+<script src="https://npm.webcache.cn/algoliasearch@4.17.1/dist/algoliasearch-lite.umd.js" integrity="sha384-xvLS0jfKuoREs7pqkRI&#x2F;OI8GcqohO5S+jQz7ZBtQXnsXmD+9jDOOY4cL6dCPzlrk" crossorigin="anonymous" defer></script>
+
+  
+<script src="https://npm.webcache.cn/@reimujs/instantsearch.js@4.57.0-beta.1/dist/instantsearch.production.min.js" integrity="sha384-aagKMe8nkqaP2DYQc8kkYOL5l+M5Q2WH&#x2F;Uhr4teOh0Ybp0RZj0kUSDm45qPikMjK" crossorigin="anonymous" defer></script>
+
+  
+<script src="/js/algolia_search.js" defer></script>
+
+
+  <script>
+    var setupFirework = () => {
+      if (!false || !window.matchMedia('(max-width: 768px)').matches) {
+        window.firework && window.firework(JSON.parse('{"excludeElements":["a","button"],"particles":[{"shape":"circle","move":["emit"],"easing":"easeOutExpo","colors":["var(--red-1)","var(--red-2)","var(--red-3)","var(--red-4)"],"number":20,"duration":[1200,1800],"shapeOptions":{"radius":[16,32],"alpha":[0.3,0.5]}},{"shape":"circle","move":["diffuse"],"easing":"easeOutExpo","colors":["var(--red-0)"],"number":1,"duration":[1200,1800],"shapeOptions":{"radius":20,"alpha":[0.2,0.5],"lineWidth":6}}]}'));
+      }
+    }
+  </script>
+  
+<script src="https://npm.webcache.cn/mouse-firework@0.2.0/dist/index.umd.js" integrity="sha384-qi9WggRt19tv8Vc7pCHW3ulMNLwrn515zaLEWZjl1px07vz8+pUoWX8n1rgq282T" crossorigin="anonymous" onload="setupFirework()" defer></script>
+
+
+
+
+
+
+<div id="lazy-script">
+  <div>
+      
+      
+      <script data-pjax>
+        window.REIMU_POST = {
+          author: "HiW",
+          title: "STM32标准库UART",
+          url: "https://binging.top/2026/04/14/stm/%E6%A0%87%E5%87%86%E5%BA%93/STM%E6%A0%87%E5%87%86%E5%BA%93UART/",
+          excerpt: "",
+          description: "",
+          stripContent: "关于UART UART是一种全双工，异步，点对点的通讯协议他主要靠设备之间互相约定传输频率没有固定的时钟信号来确认同步而且设备之间没有明确的主从之分连接最少只要3个线TX  —  RXRX  —  TXGND — GND 设备自己解决供电问题就可以通讯了 参考代码   串口外设 TX 引脚 RX 引脚 RTS 引脚 CTS 引脚 备注    USART1 PA9 PA10 PA12 PA11 最常用，挂载 APB2 高速总线，支持硬件流控   USART2 PA2 PA3 PA1 PA0 挂载 ",
+          date: "Tue Apr 14 2026 17:00:00 GMT+0800",
+          updated: "Tue Apr 14 2026 21:04:17 GMT+0800",
+          cover: "/images/banner.webp",
+        };
+      </script>
+        
+<script src="/js/insert_highlight.js" data-pjax></script>
+
+      
+<script src="/js/tabs.js" data-pjax defer></script>
+
+      <script type="module" data-pjax>
+        (async () => {
+          const PhotoSwipeLightbox = (await safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.min.js", "sha384-DiL6M/gG+wmTxmCRZyD1zee6lIhawn5TGvED0FOh7fXcN9B0aZ9dexSF/N6lrZi/")).default;
+          const initPswp = (gallery, children) => {
+            if (_$$(`${gallery} ${children}`).length > 0) {
+              new PhotoSwipeLightbox({
+                gallery,
+                children,
+                pswpModule: () => safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.esm.min.js", "sha384-WkkO3GCmgkC3VQWpaV8DqhKJqpzpF9JoByxDmnV8+oTJ7m3DfYEWX1fu1scuS4+s")
+              }).init();
+            }
+          }
+          const pswp = () => {
+            initPswp('.article-entry', 'a.article-gallery-item');
+            initPswp('.article-gallery', 'a.article-gallery-item');
+          }
+          pswp();
+        })();
+      </script>
+        
+
+
+  </div>
+</div>
+
+
+  <script>
+    console.log(String.raw`%c 
+ ______     ______     __     __    __     __  __    
+/\  == \   /\  ___\   /\ \   /\ "-./  \   /\ \/\ \   
+\ \  __<   \ \  __\   \ \ \  \ \ \-./\ \  \ \ \_\ \  
+ \ \_\ \_\  \ \_____\  \ \_\  \ \_\ \ \_\  \ \_____\ 
+  \/_/ /_/   \/_____/   \/_/   \/_/  \/_/   \/_____/ 
+                                                  
+`,'color: #ff5252;')
+    console.log('%c Theme.Reimu v' + '1.12.3' + ' %c https://github.com/D-Sketon/hexo-theme-reimu ', 'color: white; background: #ff5252; padding:5px 0;', 'padding:4px;border:1px solid #ff5252;')
+  </script>
+  
+
+
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
+</script>
+
+
+
+
+  </body>
+  </html>

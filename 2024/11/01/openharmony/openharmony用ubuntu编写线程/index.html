@@ -1,0 +1,620 @@
+  <!DOCTYPE html>
+  <html lang="zh-CN"  
+      data-theme-mode="auto"
+  >
+  <head>
+  <meta charset="utf-8">
+  
+  
+  
+  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN":"复制成功 (*^▽^*)"},"fail":{"zh-CN":"复制失败 (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'https://binging.top';</script>
+  <title>
+    openharmony用ubuntu编写线程 | Binging
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic|Noto Serif SC:400,400italic,700,700italic&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic|Noto Serif SC:400,400italic,700,700italic&display=swap" media="print" onload="this.media='all'">
+    
+<link rel="stylesheet" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/regular.min.css" integrity="sha384-4qYppzjH8EiA+cGdaubu2vL7Rk8WGiqCSj7oRuP1uwtFWkfKNHD20lPfcrbQc8dU" crossorigin="anonymous">
+<link rel="stylesheet" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/solid.min.css" integrity="sha384-wbMWab3UDSPm2kvIgVOn&#x2F;d9KPTecgPU1+Nb3zoQrm&#x2F;oVu0EkPL6IaKinjbwW0rum" crossorigin="anonymous">
+
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/brands.min.css" integrity="sha384-KTGeC2hIMzpeQakhsmzB9bZfhCD5xZZCgI1iZH6f/O457SxzlkzTQg/WXFNoi3ih" crossorigin="anonymous">
+<link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/v5-font-face.min.css" integrity="sha384-nJ1ThfldViXoLpJ6jlKcP2beas8BMbYq26SG9Hi8cH89bZi4RZ644v7helMCqJxd" crossorigin="anonymous">
+<link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/v4-font-face.min.css" integrity="sha384-UlkrhOIvZxJFd4MElSUp7ow6/RUeYKi/orfCZIRRiOENFuQPIAA3T3HjYfmBRhNq" crossorigin="anonymous">
+    
+<link rel="stylesheet" href="/css/loader.css">
+
+    <meta name="description" content="openharmony用ubuntu编写线程完整代码 第一部分：代码结构软件部分目录结构 thread_demo ├─ BUILD.gn ├─ thread_basic.c └─ thread.c  我们打开文件代码打开thread_basic.c">
+<meta property="og:type" content="article">
+<meta property="og:title" content="openharmony用ubuntu编写线程">
+<meta property="og:url" content="https://binging.top/2024/11/01/openharmony/openharmony%E7%94%A8ubuntu%E7%BC%96%E5%86%99%E7%BA%BF%E7%A8%8B/index.html">
+<meta property="og:site_name" content="Binging">
+<meta property="og:description" content="openharmony用ubuntu编写线程完整代码 第一部分：代码结构软件部分目录结构 thread_demo ├─ BUILD.gn ├─ thread_basic.c └─ thread.c  我们打开文件代码打开thread_basic.c">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://binging.top/img/openharmony/openharmony%E7%94%A8ubuntu%E7%BC%96%E5%86%99%E7%BA%BF%E7%A8%8B/1.webp">
+<meta property="og:image" content="https://binging.top/img/openharmony/openharmony%E7%94%A8ubuntu%E7%BC%96%E5%86%99%E7%BA%BF%E7%A8%8B/2.webp">
+<meta property="article:published_time" content="2024-11-01T12:30:00.000Z">
+<meta property="article:modified_time" content="2026-04-09T12:40:18.684Z">
+<meta property="article:author" content="HiW">
+<meta property="article:tag" content="openharmony">
+<meta property="article:tag" content="ubuntu">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://binging.top/img/openharmony/openharmony%E7%94%A8ubuntu%E7%BC%96%E5%86%99%E7%BA%BF%E7%A8%8B/1.webp">
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.css" integrity="sha384-IfxC36XL/toUyJ939C73PcgMuRzAZuIzZxE38drsmO5p6jD7ei+Zx/1oA/0l8ysE" crossorigin="anonymous">
+    
+<script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous"></script>
+
+    
+<link rel="stylesheet" href="https://npm.webcache.cn/@reimujs/aos@0.1.2/dist/aos.css" integrity="sha384-GMRP93c6Hkz9JVKGAuRR3nTS7M07RwPgTFenXiosjq2VbVgvdDNcz1g6Mkj8AONa" crossorigin="anonymous">
+
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+  <body>
+      <div id='loader'>
+    <div class="loading-left-bg loading-bg"></div>
+    <div class="loading-right-bg loading-bg"></div>
+    <div class="spinner-box">
+      <div class="loading-taichi rotate">
+          <svg width="150" height="150" viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="https://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+            <path d="M303.5 432A80 80 0 0 1 291.5 592A80 80 0 0 1 303.5 432z" fill="var(--red-1, #ff5252)" />
+            <path d="M512 65A447 447 0 0 1 512 959L512 929A417 417 0 0 0 512 95A417 417 0 0 0 512 929L512 959A447 447 0 0 1 512 65z 
+           M512 95A417 417 0 0 1 929 512A208.5 208.5 0 0 1 720.5 720.5L720.5 592A80 80 0 0 0 720.5 432A80 80 0 0 0 720.5 592L720.5 720.5A208.5 208.5 0 0 1 512 512A208.5 208.5 0 0 0 303.5 303.5A208.5 208.5 0 0 0 95 512A417 417 0 0 1 512 95z" fill="var(--red-1, #ff5252)" />
+          </svg>
+      </div>
+      <div class="loading-word">少女祈祷中...</div>
+    </div>
+  </div>
+  <script>
+    var time = null;
+    var loaderEl = document.getElementById('loader');
+    var startLoading = () => {
+      time = Date.now();
+      loaderEl.classList.remove("loading");
+    }
+    var hideLoader = () => {
+      document.body.style.overflow = 'auto';
+      loader.classList.add('loading');
+    };
+
+    var endLoading = () => {
+      if (!time) {
+        hideLoader();
+      } else {
+        if (Date.now() - time > 500) {
+          time = null;
+          hideLoader();
+        } else {
+          setTimeout(endLoading, 500 - (Date.now() - time));
+          time = null;
+        }
+      }
+    }
+    window.addEventListener('DOMContentLoaded', endLoading);
+    loaderEl.addEventListener('click', endLoading);
+  </script>
+<div id="copy-tooltip"></div>
+<div id="heatmap-tooltip"></div>
+
+
+    <div id="container">
+      <div id="wrap">
+        <div id="header-nav">
+  <nav id="main-nav" aria-label="Primary navigation">
+        <a class="main-nav-link-wrap" href="/">
+            <div class="main-nav-icon icon ">
+                  &#xe3af;
+            </div>
+          <span class="main-nav-link">首页</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/archives">
+            <div class="main-nav-icon icon ">
+                  &#xf187;
+            </div>
+          <span class="main-nav-link">归档</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/about">
+            <div class="main-nav-icon icon ">
+                  &#xf05a;
+            </div>
+          <span class="main-nav-link">关于</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/friend">
+            <div class="main-nav-icon icon ">
+                  &#xf500;
+            </div>
+          <span class="main-nav-link">友链</span>
+        </a>
+    <a id="main-nav-toggle" class="nav-icon" aria-label="Toggle navigation" role="button"></a>
+  </nav>
+  <nav id="sub-nav" aria-label="Secondary navigation">
+      <a id="nav-search-btn" class="nav-icon popup-trigger" title="搜索" aria-label="搜索"></a>
+  </nav>
+</div>
+<header id="header" aria-label="Site header">
+        <picture>
+        </picture>
+          <img  fetchpriority="high" src="/images/banner.webp" alt="openharmony用ubuntu编写线程">
+  <div id="header-outer">
+    <div id="header-title">
+          <span id="logo">
+            <h1 data-aos="slide-up">openharmony用ubuntu编写线程</h1>
+          </span>
+        <h2 id="subtitle-wrap" data-aos="slide-down">
+        </h2>
+    </div>
+  </div>
+</header>
+
+        <div id="content" aria-label="Page content"  class="sidebar-right" >
+          <aside id="sidebar" aria-label="Sidebar">
+  <div class="sidebar-wrapper-container sticky">
+  <div class="sidebar-wrapper">
+    <div class="sidebar-wrap" data-aos="fade-up">
+          <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#openharmony%E7%94%A8ubuntu%E7%BC%96%E5%86%99%E7%BA%BF%E7%A8%8B"><span class="toc-number">1.</span> <span class="toc-text">openharmony用ubuntu编写线程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%EF%BC%9A%E4%BB%A3%E7%A0%81%E7%BB%93%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">第一部分：代码结构</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%BB%E8%A6%81%E5%87%BD%E6%95%B0"><span class="toc-number">3.</span> <span class="toc-text">主要函数</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%B4%E6%96%87%E4%BB%B6"><span class="toc-number">3.1.</span> <span class="toc-text">头文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%BA%BF%E7%A8%8B%EF%BC%8C%E5%B9%B6%E5%B0%86%E5%85%B6%E5%8A%A0%E5%85%A5%E6%B4%BB%E8%B7%83%E7%BA%BF%E7%A8%8B%E7%BB%84%E4%B8%AD"><span class="toc-number">3.2.</span> <span class="toc-text">创建一个线程，并将其加入活跃线程组中</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E5%BD%93%E5%89%8D%E7%BA%BF%E7%A8%8BID"><span class="toc-number">3.3.</span> <span class="toc-text">读取当前线程ID</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E5%BD%93%E5%89%8D%E7%BA%BF%E7%A8%8B%E5%90%8D%E5%AD%97"><span class="toc-number">3.4.</span> <span class="toc-text">读取当前线程名字</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%97%E5%88%B0%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%8A%B6%E6%80%81"><span class="toc-number">3.5.</span> <span class="toc-text">得到线程的状态</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AE%E7%BA%BF%E7%A8%8B%E7%9A%84%E4%BC%98%E5%85%88%E7%BA%A7"><span class="toc-number">3.6.</span> <span class="toc-text">设置线程的优先级</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E7%BA%BF%E7%A8%8B%E7%9A%84%E4%BC%98%E5%85%88%E7%BA%A7"><span class="toc-number">3.7.</span> <span class="toc-text">读取线程的优先级</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8C%82%E8%B5%B7%E7%BA%BF%E7%A8%8B"><span class="toc-number">3.8.</span> <span class="toc-text">挂起线程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%81%A2%E5%A4%8D%E7%BA%BF%E7%A8%8B"><span class="toc-number">3.9.</span> <span class="toc-text">恢复线程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%97%E5%88%B0%E7%BA%BF%E7%A8%8B%E7%9A%84%E6%A0%88%E7%A9%BA%E9%97%B4%E5%A4%A7%E5%B0%8F"><span class="toc-number">3.10.</span> <span class="toc-text">得到线程的栈空间大小</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%97%E5%88%B0%E7%BA%BF%E7%A8%8B%E7%9A%84%E6%9C%AA%E4%BD%BF%E7%94%A8%E7%9A%84%E6%A0%88%E7%A9%BA%E9%97%B4%E5%A4%A7%E5%B0%8F"><span class="toc-number">3.11.</span> <span class="toc-text">得到线程的未使用的栈空间大小</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E6%B4%BB%E8%B7%83%E7%BA%BF%E7%A8%8B%E6%95%B0"><span class="toc-number">3.12.</span> <span class="toc-text">获取活跃线程数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%88%E6%AD%A2%E7%BA%BF%E7%A8%8B"><span class="toc-number">3.13.</span> <span class="toc-text">终止线程</span></a></li></ol></li></ol>
+</div>
+</div>
+          <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="HiW" class="lazyload">
+  <div class="sidebar-author-name">HiW</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">61</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">10</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">15</div>
+  </div>
+</div>
+<div class="sidebar-social" >
+</div>
+<div class="sidebar-menu">
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="首页"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xe3af;
+          </div>
+        <div class="sidebar-menu-link">首页</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf187;
+          </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/about" aria-label="关于"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf05a;
+          </div>
+        <div class="sidebar-menu-link">关于</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf500;
+          </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+</div>
+</div>
+          <div class="sidebar-btn-wrapper" style="position:static">
+            <div class="sidebar-toc-btn current"></div>
+            <div class="sidebar-common-btn"></div>
+          </div>
+    </div>
+  </div>
+  <div class="sidebar-widget">
+  </div>
+  </div>
+</aside>
+
+          <section id="main" aria-label="Main content"><article id="post-openharmony/openharmony用ubuntu编写线程" class="h-entry article" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner" data-aos="fade-up">
+    <div class="article-meta">
+      <div class="article-date">
+  <span class="article-date-link icon-calendar" data-aos="zoom-in">
+    <time datetime="2024-11-01T12:30:00.000Z" itemprop="datePublished">2024-11-01</time>
+    <time style="display: none;" id="post-update-time">2026-04-09</time>
+  </span>
+</div>
+
+    </div>
+    
+    <div class="hr-line"></div>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+        <h2 id="openharmony用ubuntu编写线程"><a href="#openharmony用ubuntu编写线程" class="headerlink" title="openharmony用ubuntu编写线程"></a>openharmony用ubuntu编写线程</h2><p><a target="_blank" rel="noopener" href="https://github.com/HiW666/openharmony-code/tree/main/applications/sample/wifi-iot/app/thread_demo">完整代码</a></p>
+<h1 id="第一部分：代码结构"><a href="#第一部分：代码结构" class="headerlink" title="第一部分：代码结构"></a>第一部分：代码结构</h1><p>软件部分目录结构</p>
+<pre><code>thread_demo
+├─ BUILD.gn
+├─ thread_basic.c
+└─ thread.c
+</code></pre>
+<p>我们打开文件<br>代码打开thread_basic.c</p>
+<p><img src="/img/openharmony/openharmony%E7%94%A8ubuntu%E7%BC%96%E5%86%99%E7%BA%BF%E7%A8%8B/1.webp"></p>
+<span id="more"></span>
+
+<p>编译后会看到效果<br><img src="/img/openharmony/openharmony%E7%94%A8ubuntu%E7%BC%96%E5%86%99%E7%BA%BF%E7%A8%8B/2.webp"><br>可以看到是一直增加的</p>
+<h1 id="主要函数"><a href="#主要函数" class="headerlink" title="主要函数"></a>主要函数</h1><h2 id="头文件"><a href="#头文件" class="headerlink" title="头文件"></a>头文件</h2><pre><code>// POSIX标准接口
+#include &lt;unistd.h&gt;
+
+// 用于初始化服务(services)和功能(features)
+#include &quot;ohos_init.h&quot;
+
+// CMSIS-RTOS API V2
+// 是OpenHarmony的LiteOS_m内核与应用程序之间的抽象层。（LiteOS_m内核基于Cortex M系列芯片）
+// 提供标准接口，便于应用程序移植来OpenHarmony，或者移植到其他支持CMSIS-RTOS API V2的系统。
+// 头文件：kernel/liteos_m/kal/cmsis/cmsis_os2.h
+// 源文件：kernel/liteos_m/kal/cmsis/cmsis_liteos2.c
+#include &quot;cmsis_os2.h&quot;
+</code></pre>
+<h2 id="创建一个线程，并将其加入活跃线程组中"><a href="#创建一个线程，并将其加入活跃线程组中" class="headerlink" title="创建一个线程，并将其加入活跃线程组中"></a>创建一个线程，并将其加入活跃线程组中</h2><pre><code>osThreadNew((osThreadFunc_t)threadMain, NULL, &amp;attr) 
+osThreadId_t osThreadNew(osThreadFunc_t func, void *argument, const osThreadAttr_t *attr)
+</code></pre>
+<p>&#x2F;&#x2F; func	线程要运行的函数<br>&#x2F;&#x2F; argument	指针，指向传递给线程函数的参数（可以是”xxxx”的形式）<br>&#x2F;&#x2F; attr	线程属性(使用结构体)<br>&#x2F;&#x2F; 注意：不能在中断服务调用该函数</p>
+<pre><code>//关于attr结构体
+// 定义线程属性
+osThreadAttr_t attr;
+// 线程名
+attr.name = &quot;rtosv2_thread_main&quot;;
+// 线程属性位
+attr.attr_bits = 0U;
+// 线程控制块的内存初始地址，默认为系统自动分配
+attr.cb_mem = NULL;
+// 线程控制块的内存大小
+attr.cb_size = 0U;
+// 线程栈的内存初始地址，默认为系统自动分配
+attr.stack_mem = NULL;
+// 线程栈的内存大小
+attr.stack_size = 1024;
+// 线程优先级，9(highest) - 38(lowest priority)，默认为osPriorityNormal
+// 位置：kernel\liteos_m\kal\cmsis\cmsis_os2.h
+attr.priority = osPriorityNormal;
+</code></pre>
+<p>如果osThreadNew((osThreadFunc_t)threadMain, NULL, &amp;attr)&#x3D;&#x3D;NULL说明函数运行失败</p>
+<h2 id="读取当前线程ID"><a href="#读取当前线程ID" class="headerlink" title="读取当前线程ID"></a>读取当前线程ID</h2><pre><code>osThreadGetId();
+</code></pre>
+<p>参考用法</p>
+<pre><code>osThreadId_t tid = osThreadGetId();
+printf(&quot;thread id: %p\r\n&quot;, tid);
+</code></pre>
+<h2 id="读取当前线程名字"><a href="#读取当前线程名字" class="headerlink" title="读取当前线程名字"></a>读取当前线程名字</h2><pre><code>osThreadGetName(tid)
+</code></pre>
+<p>tid为线程ID<br>可以用上面的方法获取ID</p>
+<h2 id="得到线程的状态"><a href="#得到线程的状态" class="headerlink" title="得到线程的状态"></a>得到线程的状态</h2><pre><code>osThreadGetState(tid)
+</code></pre>
+<p>tid为线程ID<br>可以用上面的方法获取ID</p>
+<h2 id="设置线程的优先级"><a href="#设置线程的优先级" class="headerlink" title="设置线程的优先级"></a>设置线程的优先级</h2><pre><code>osThreadSetPriority(tid, osPriorityNormal4);
+</code></pre>
+<p>tid为线程ID<br>可以用上面的方法获取ID<br>osPriorityNormal4为优先级<br>优先级有</p>
+<pre><code>osPriorityNormal        = 24,
+osPriorityNormal1       = 24+1,
+osPriorityNormal2       = 24+2,
+osPriorityNormal3       = 24+3,
+osPriorityNormal4       = 24+4,
+osPriorityNormal5       = 24+5,
+osPriorityNormal6       = 24+6,
+osPriorityNormal7       = 24+7,
+</code></pre>
+<h2 id="读取线程的优先级"><a href="#读取线程的优先级" class="headerlink" title="读取线程的优先级"></a>读取线程的优先级</h2><pre><code>osThreadGetPriority(tid);
+</code></pre>
+<p>tid为线程ID<br>可以用上面的方法获取ID   </p>
+<h2 id="挂起线程"><a href="#挂起线程" class="headerlink" title="挂起线程"></a>挂起线程</h2><pre><code>osThreadSuspend(tid);
+</code></pre>
+<p>也可以读取挂起情况</p>
+<h2 id="恢复线程"><a href="#恢复线程" class="headerlink" title="恢复线程"></a>恢复线程</h2><pre><code>osThreadResume(tid);
+</code></pre>
+<h2 id="得到线程的栈空间大小"><a href="#得到线程的栈空间大小" class="headerlink" title="得到线程的栈空间大小"></a>得到线程的栈空间大小</h2><pre><code>osThreadGetStackSize(tid);
+</code></pre>
+<h2 id="得到线程的未使用的栈空间大小"><a href="#得到线程的未使用的栈空间大小" class="headerlink" title="得到线程的未使用的栈空间大小"></a>得到线程的未使用的栈空间大小</h2><pre><code>osThreadGetStackSpace(tid);
+</code></pre>
+<h2 id="获取活跃线程数"><a href="#获取活跃线程数" class="headerlink" title="获取活跃线程数"></a>获取活跃线程数</h2><pre><code>osThreadGetCount();
+</code></pre>
+<h2 id="终止线程"><a href="#终止线程" class="headerlink" title="终止线程"></a>终止线程</h2><pre><code>osThreadTerminate(tid);
+</code></pre>
+
+    </div>
+    <footer class="article-footer">
+        <a class="article-category-link" href="/categories/openharmony/" title="openharmony" data-aos="zoom-in">openharmony</a>
+
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="/tags/openharmony/" rel="tag" title="openharmony">openharmony</a></li><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="/tags/ubuntu/" rel="tag" title="ubuntu">ubuntu</a></li></ul>
+
+    </footer>
+  </div>
+    <nav id="article-nav" aria-label="Article navigation" data-aos="fade-up">
+      <div class="article-nav-link-wrap left">
+            <img data-src="/covers/4.webp" data-sizes="auto" alt="arduino基于ESP32基本信息" class="lazyload">
+        <a href="/2024/11/01/arduion/arduino%E5%9F%BA%E4%BA%8EESP32%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF/" aria-label="前一篇: arduino基于ESP32基本信息" title="前一篇: arduino基于ESP32基本信息"></a>
+        <div class="article-nav-caption">前一篇</div>
+        <h3 class="article-nav-title">
+            arduino基于ESP32基本信息
+        </h3>
+      </div>
+    <div class="article-nav-link-wrap right">
+          <img data-src="/covers/2.webp" data-sizes="auto" alt="openharmony用ubuntu编写键值" class="lazyload">
+      <a href="/2024/10/22/openharmony/openharmony%E7%94%A8ubuntu%E7%BC%96%E5%86%99%E9%94%AE%E5%80%BC/" aria-label="后一篇: openharmony用ubuntu编写键值"  title="后一篇: openharmony用ubuntu编写键值"></a>
+      <div class="article-nav-caption">后一篇</div>
+      <h3 class="article-nav-title">
+          openharmony用ubuntu编写键值
+      </h3>
+    </div>
+  </nav>
+
+</article>
+
+
+</section>
+        </div>
+        <footer id="footer" aria-label="Site footer">
+  <div style="width: 100%; overflow: hidden">
+    <div class="footer-line"></div>
+  </div>
+  <div id="footer-info">
+    <div>
+      <span class="icon-copyright"></span>
+        2020-2026
+        <span class="footer-info-sep rotate"></span>
+      HiW
+    </div>
+  </div>
+</footer>
+
+          <div class="sidebar-top">
+            <div class="sidebar-top-taichi rotate"></div>
+            <div class="arrow-up"></div>
+          </div>
+        <div id="mask" class="hide"></div>
+      </div>
+      <nav id="mobile-nav" aria-label="Mobile navigation">
+  <div class="sidebar-wrap">
+        <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#openharmony%E7%94%A8ubuntu%E7%BC%96%E5%86%99%E7%BA%BF%E7%A8%8B"><span class="toc-number">1.</span> <span class="toc-text">openharmony用ubuntu编写线程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%EF%BC%9A%E4%BB%A3%E7%A0%81%E7%BB%93%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">第一部分：代码结构</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%BB%E8%A6%81%E5%87%BD%E6%95%B0"><span class="toc-number">3.</span> <span class="toc-text">主要函数</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%B4%E6%96%87%E4%BB%B6"><span class="toc-number">3.1.</span> <span class="toc-text">头文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%BA%BF%E7%A8%8B%EF%BC%8C%E5%B9%B6%E5%B0%86%E5%85%B6%E5%8A%A0%E5%85%A5%E6%B4%BB%E8%B7%83%E7%BA%BF%E7%A8%8B%E7%BB%84%E4%B8%AD"><span class="toc-number">3.2.</span> <span class="toc-text">创建一个线程，并将其加入活跃线程组中</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E5%BD%93%E5%89%8D%E7%BA%BF%E7%A8%8BID"><span class="toc-number">3.3.</span> <span class="toc-text">读取当前线程ID</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E5%BD%93%E5%89%8D%E7%BA%BF%E7%A8%8B%E5%90%8D%E5%AD%97"><span class="toc-number">3.4.</span> <span class="toc-text">读取当前线程名字</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%97%E5%88%B0%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%8A%B6%E6%80%81"><span class="toc-number">3.5.</span> <span class="toc-text">得到线程的状态</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AE%E7%BA%BF%E7%A8%8B%E7%9A%84%E4%BC%98%E5%85%88%E7%BA%A7"><span class="toc-number">3.6.</span> <span class="toc-text">设置线程的优先级</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E7%BA%BF%E7%A8%8B%E7%9A%84%E4%BC%98%E5%85%88%E7%BA%A7"><span class="toc-number">3.7.</span> <span class="toc-text">读取线程的优先级</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8C%82%E8%B5%B7%E7%BA%BF%E7%A8%8B"><span class="toc-number">3.8.</span> <span class="toc-text">挂起线程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%81%A2%E5%A4%8D%E7%BA%BF%E7%A8%8B"><span class="toc-number">3.9.</span> <span class="toc-text">恢复线程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%97%E5%88%B0%E7%BA%BF%E7%A8%8B%E7%9A%84%E6%A0%88%E7%A9%BA%E9%97%B4%E5%A4%A7%E5%B0%8F"><span class="toc-number">3.10.</span> <span class="toc-text">得到线程的栈空间大小</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%97%E5%88%B0%E7%BA%BF%E7%A8%8B%E7%9A%84%E6%9C%AA%E4%BD%BF%E7%94%A8%E7%9A%84%E6%A0%88%E7%A9%BA%E9%97%B4%E5%A4%A7%E5%B0%8F"><span class="toc-number">3.11.</span> <span class="toc-text">得到线程的未使用的栈空间大小</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E6%B4%BB%E8%B7%83%E7%BA%BF%E7%A8%8B%E6%95%B0"><span class="toc-number">3.12.</span> <span class="toc-text">获取活跃线程数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%88%E6%AD%A2%E7%BA%BF%E7%A8%8B"><span class="toc-number">3.13.</span> <span class="toc-text">终止线程</span></a></li></ol></li></ol>
+</div>
+</div>
+        <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="HiW" class="lazyload">
+  <div class="sidebar-author-name">HiW</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">61</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">10</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">15</div>
+  </div>
+</div>
+<div class="sidebar-social" >
+</div>
+<div class="sidebar-menu">
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="首页"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xe3af;
+          </div>
+        <div class="sidebar-menu-link">首页</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf187;
+          </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/about" aria-label="关于"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf05a;
+          </div>
+        <div class="sidebar-menu-link">关于</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf500;
+          </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+</div>
+</div>
+  </div>
+      <div class="sidebar-btn-wrapper">
+        <div class="sidebar-toc-btn current"></div>
+        <div class="sidebar-common-btn"></div>
+      </div>
+</nav>
+
+    </div>
+      <div class="site-search">
+        <div class="reimu-popup popup">
+          <div class="reimu-search">
+            <div class="reimu-search-input-icon"></div>
+            <div id="reimu-search-input"></div>
+            <div class="popup-btn-close"></div>
+          </div>
+          <div class="reimu-results">
+            <div id="reimu-stats"></div>
+            <div id="reimu-hits"></div>
+            <div id="reimu-pagination" class="reimu-pagination"></div>
+          </div>
+          <img class="reimu-bg" src="/images/reimu.png" loading="lazy" decoding="async" fetchpriority="low"/>
+        </div>
+      </div>
+    
+<script src="https://npm.webcache.cn/lazysizes@5.3.2/lazysizes.min.js" integrity="sha384-3gT&#x2F;vsepWkfz&#x2F;ff7PpWNUeMzeWoH3cDhm&#x2F;A8jM7ouoAK0&#x2F;fP&#x2F;9bcHHR5kHq2nf+e" crossorigin="anonymous"></script>
+
+
+<script src="https://npm.webcache.cn/clipboard@2.0.11/dist/clipboard.min.js" integrity="sha384-J08i8An&#x2F;QeARD9ExYpvphB8BsyOj3Gh2TSh1aLINKO3L0cMSH2dN3E22zFoXEi0Q" crossorigin="anonymous"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+  
+<script src="/js/aos.js"></script>
+
+  <script>
+    var aosInit = () => {
+      AOS.init({
+        duration: 1000,
+        easing: "ease",
+        once: true,
+        offset: 50,
+      });
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', aosInit);
+    } else {
+      aosInit();
+    }
+  </script>
+
+
+<script src="/js/pjax_script.js" data-pjax></script>
+
+
+
+  <script>
+    var ALGOLIA_CONFIG = {
+      logo: "/images/algolia_logo.svg",
+      algolia: {
+        applicationID: "29NDGCSMY6",
+        apiKey: "6d330d43eefc2a0de625b8b431bcb121",
+        indexName: "binging",
+        hits: {
+          "per_page": parseInt("10")
+        },
+        labels: {
+          "input_placeholder": "搜索.....",
+          "hits_empty": "未发现与 「${query}」相关内容",
+          "hits_stats": "找到${hits}条结果（用时 ${time} ms）"
+        }
+      }
+    };
+  </script>
+  
+<script src="https://npm.webcache.cn/algoliasearch@4.17.1/dist/algoliasearch-lite.umd.js" integrity="sha384-xvLS0jfKuoREs7pqkRI&#x2F;OI8GcqohO5S+jQz7ZBtQXnsXmD+9jDOOY4cL6dCPzlrk" crossorigin="anonymous" defer></script>
+
+  
+<script src="https://npm.webcache.cn/@reimujs/instantsearch.js@4.57.0-beta.1/dist/instantsearch.production.min.js" integrity="sha384-aagKMe8nkqaP2DYQc8kkYOL5l+M5Q2WH&#x2F;Uhr4teOh0Ybp0RZj0kUSDm45qPikMjK" crossorigin="anonymous" defer></script>
+
+  
+<script src="/js/algolia_search.js" defer></script>
+
+
+  <script>
+    var setupFirework = () => {
+      if (!false || !window.matchMedia('(max-width: 768px)').matches) {
+        window.firework && window.firework(JSON.parse('{"excludeElements":["a","button"],"particles":[{"shape":"circle","move":["emit"],"easing":"easeOutExpo","colors":["var(--red-1)","var(--red-2)","var(--red-3)","var(--red-4)"],"number":20,"duration":[1200,1800],"shapeOptions":{"radius":[16,32],"alpha":[0.3,0.5]}},{"shape":"circle","move":["diffuse"],"easing":"easeOutExpo","colors":["var(--red-0)"],"number":1,"duration":[1200,1800],"shapeOptions":{"radius":20,"alpha":[0.2,0.5],"lineWidth":6}}]}'));
+      }
+    }
+  </script>
+  
+<script src="https://npm.webcache.cn/mouse-firework@0.2.0/dist/index.umd.js" integrity="sha384-qi9WggRt19tv8Vc7pCHW3ulMNLwrn515zaLEWZjl1px07vz8+pUoWX8n1rgq282T" crossorigin="anonymous" onload="setupFirework()" defer></script>
+
+
+
+
+
+
+<div id="lazy-script">
+  <div>
+      
+      
+      <script data-pjax>
+        window.REIMU_POST = {
+          author: "HiW",
+          title: "openharmony用ubuntu编写线程",
+          url: "https://binging.top/2024/11/01/openharmony/openharmony%E7%94%A8ubuntu%E7%BC%96%E5%86%99%E7%BA%BF%E7%A8%8B/",
+          excerpt: "openharmony用ubuntu编写线程完整代码 第一部分：代码结构软件部分目录结构 thread_demo ├─ BUILD.gn ├─ thread_basic.c └─ thread.c  我们打开文件代码打开thread_basic.c ",
+          description: "",
+          stripContent: "openharmony用ubuntu编写线程完整代码 第一部分：代码结构软件部分目录结构 thread_demo ├─ BUILD.gn ├─ thread_basic.c └─ thread.c  我们打开文件代码打开thread_basic.c    编译后会看到效果可以看到是一直增加的 主要函数头文件// POSIX标准接口 #include &amp;lt;unistd.h&amp;gt;  // 用于初始化服务(services)和功能(features) #include &amp;quot;ohos_in",
+          date: "Fri Nov 01 2024 20:30:00 GMT+0800",
+          updated: "Thu Apr 09 2026 20:40:18 GMT+0800",
+          cover: "/images/banner.webp",
+        };
+      </script>
+        
+<script src="/js/insert_highlight.js" data-pjax></script>
+
+      
+<script src="/js/tabs.js" data-pjax defer></script>
+
+      <script type="module" data-pjax>
+        (async () => {
+          const PhotoSwipeLightbox = (await safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.min.js", "sha384-DiL6M/gG+wmTxmCRZyD1zee6lIhawn5TGvED0FOh7fXcN9B0aZ9dexSF/N6lrZi/")).default;
+          const initPswp = (gallery, children) => {
+            if (_$$(`${gallery} ${children}`).length > 0) {
+              new PhotoSwipeLightbox({
+                gallery,
+                children,
+                pswpModule: () => safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.esm.min.js", "sha384-WkkO3GCmgkC3VQWpaV8DqhKJqpzpF9JoByxDmnV8+oTJ7m3DfYEWX1fu1scuS4+s")
+              }).init();
+            }
+          }
+          const pswp = () => {
+            initPswp('.article-entry', 'a.article-gallery-item');
+            initPswp('.article-gallery', 'a.article-gallery-item');
+          }
+          pswp();
+        })();
+      </script>
+        
+
+
+  </div>
+</div>
+
+
+  <script>
+    console.log(String.raw`%c 
+ ______     ______     __     __    __     __  __    
+/\  == \   /\  ___\   /\ \   /\ "-./  \   /\ \/\ \   
+\ \  __<   \ \  __\   \ \ \  \ \ \-./\ \  \ \ \_\ \  
+ \ \_\ \_\  \ \_____\  \ \_\  \ \_\ \ \_\  \ \_____\ 
+  \/_/ /_/   \/_____/   \/_/   \/_/  \/_/   \/_____/ 
+                                                  
+`,'color: #ff5252;')
+    console.log('%c Theme.Reimu v' + '1.12.3' + ' %c https://github.com/D-Sketon/hexo-theme-reimu ', 'color: white; background: #ff5252; padding:5px 0;', 'padding:4px;border:1px solid #ff5252;')
+  </script>
+  
+
+
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
+</script>
+
+
+
+
+  </body>
+  </html>

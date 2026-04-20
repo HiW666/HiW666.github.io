@@ -1,0 +1,595 @@
+  <!DOCTYPE html>
+  <html lang="zh-CN"  
+      data-theme-mode="auto"
+  >
+  <head>
+  <meta charset="utf-8">
+  
+  
+  
+  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN":"复制成功 (*^▽^*)"},"fail":{"zh-CN":"复制失败 (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'https://binging.top';</script>
+  <title>
+    STM32标准库GPIO | Binging
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic|Noto Serif SC:400,400italic,700,700italic&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic|Noto Serif SC:400,400italic,700,700italic&display=swap" media="print" onload="this.media='all'">
+    
+<link rel="stylesheet" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/regular.min.css" integrity="sha384-4qYppzjH8EiA+cGdaubu2vL7Rk8WGiqCSj7oRuP1uwtFWkfKNHD20lPfcrbQc8dU" crossorigin="anonymous">
+<link rel="stylesheet" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/solid.min.css" integrity="sha384-wbMWab3UDSPm2kvIgVOn&#x2F;d9KPTecgPU1+Nb3zoQrm&#x2F;oVu0EkPL6IaKinjbwW0rum" crossorigin="anonymous">
+
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/brands.min.css" integrity="sha384-KTGeC2hIMzpeQakhsmzB9bZfhCD5xZZCgI1iZH6f/O457SxzlkzTQg/WXFNoi3ih" crossorigin="anonymous">
+<link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/v5-font-face.min.css" integrity="sha384-nJ1ThfldViXoLpJ6jlKcP2beas8BMbYq26SG9Hi8cH89bZi4RZ644v7helMCqJxd" crossorigin="anonymous">
+<link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/v4-font-face.min.css" integrity="sha384-UlkrhOIvZxJFd4MElSUp7ow6/RUeYKi/orfCZIRRiOENFuQPIAA3T3HjYfmBRhNq" crossorigin="anonymous">
+    
+<link rel="stylesheet" href="/css/loader.css">
+
+    <meta name="description" content="本教程使用的单片机为stm32f103c8t6 STM32标准库GPIO作为STM32最基本的外设，GPIO最基本的输出功能是由STM32控制 引脚输出高低电平，比如可以把GPIO接LED灯来控制其亮灭，也可以接继电器或者三极管，通过继电器或三极管来控制外部大功率电路的通断。 这是大概到结构图，看的懂就看，看不懂就算了。 STM32一共是有8种模式输入模式：（1）GPIO_Mode_IN_FLOA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STM32标准库GPIO">
+<meta property="og:url" content="https://binging.top/2024/03/27/stm/%E6%A0%87%E5%87%86%E5%BA%93/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/index.html">
+<meta property="og:site_name" content="Binging">
+<meta property="og:description" content="本教程使用的单片机为stm32f103c8t6 STM32标准库GPIO作为STM32最基本的外设，GPIO最基本的输出功能是由STM32控制 引脚输出高低电平，比如可以把GPIO接LED灯来控制其亮灭，也可以接继电器或者三极管，通过继电器或三极管来控制外部大功率电路的通断。 这是大概到结构图，看的懂就看，看不懂就算了。 STM32一共是有8种模式输入模式：（1）GPIO_Mode_IN_FLOA">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/1.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/2.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/3.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/7.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/8.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/9.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/10.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/11.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/4.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/5.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/6.webp">
+<meta property="article:published_time" content="2024-03-27T02:17:00.000Z">
+<meta property="article:modified_time" content="2026-04-20T07:56:00.849Z">
+<meta property="article:author" content="HiW">
+<meta property="article:tag" content="STM32">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/1.webp">
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.css" integrity="sha384-IfxC36XL/toUyJ939C73PcgMuRzAZuIzZxE38drsmO5p6jD7ei+Zx/1oA/0l8ysE" crossorigin="anonymous">
+    
+<script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous"></script>
+
+    
+<link rel="stylesheet" href="https://npm.webcache.cn/@reimujs/aos@0.1.2/dist/aos.css" integrity="sha384-GMRP93c6Hkz9JVKGAuRR3nTS7M07RwPgTFenXiosjq2VbVgvdDNcz1g6Mkj8AONa" crossorigin="anonymous">
+
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+  <body>
+      <div id='loader'>
+    <div class="loading-left-bg loading-bg"></div>
+    <div class="loading-right-bg loading-bg"></div>
+    <div class="spinner-box">
+      <div class="loading-taichi rotate">
+          <svg width="150" height="150" viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="https://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+            <path d="M303.5 432A80 80 0 0 1 291.5 592A80 80 0 0 1 303.5 432z" fill="var(--red-1, #ff5252)" />
+            <path d="M512 65A447 447 0 0 1 512 959L512 929A417 417 0 0 0 512 95A417 417 0 0 0 512 929L512 959A447 447 0 0 1 512 65z 
+           M512 95A417 417 0 0 1 929 512A208.5 208.5 0 0 1 720.5 720.5L720.5 592A80 80 0 0 0 720.5 432A80 80 0 0 0 720.5 592L720.5 720.5A208.5 208.5 0 0 1 512 512A208.5 208.5 0 0 0 303.5 303.5A208.5 208.5 0 0 0 95 512A417 417 0 0 1 512 95z" fill="var(--red-1, #ff5252)" />
+          </svg>
+      </div>
+      <div class="loading-word">少女祈祷中...</div>
+    </div>
+  </div>
+  <script>
+    var time = null;
+    var loaderEl = document.getElementById('loader');
+    var startLoading = () => {
+      time = Date.now();
+      loaderEl.classList.remove("loading");
+    }
+    var hideLoader = () => {
+      document.body.style.overflow = 'auto';
+      loader.classList.add('loading');
+    };
+
+    var endLoading = () => {
+      if (!time) {
+        hideLoader();
+      } else {
+        if (Date.now() - time > 500) {
+          time = null;
+          hideLoader();
+        } else {
+          setTimeout(endLoading, 500 - (Date.now() - time));
+          time = null;
+        }
+      }
+    }
+    window.addEventListener('DOMContentLoaded', endLoading);
+    loaderEl.addEventListener('click', endLoading);
+  </script>
+<div id="copy-tooltip"></div>
+<div id="heatmap-tooltip"></div>
+
+
+    <div id="container">
+      <div id="wrap">
+        <div id="header-nav">
+  <nav id="main-nav" aria-label="Primary navigation">
+        <a class="main-nav-link-wrap" href="/">
+            <div class="main-nav-icon icon ">
+                  &#xe3af;
+            </div>
+          <span class="main-nav-link">首页</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/archives">
+            <div class="main-nav-icon icon ">
+                  &#xf187;
+            </div>
+          <span class="main-nav-link">归档</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/about">
+            <div class="main-nav-icon icon ">
+                  &#xf05a;
+            </div>
+          <span class="main-nav-link">关于</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/friend">
+            <div class="main-nav-icon icon ">
+                  &#xf500;
+            </div>
+          <span class="main-nav-link">友链</span>
+        </a>
+    <a id="main-nav-toggle" class="nav-icon" aria-label="Toggle navigation" role="button"></a>
+  </nav>
+  <nav id="sub-nav" aria-label="Secondary navigation">
+      <a id="nav-search-btn" class="nav-icon popup-trigger" title="搜索" aria-label="搜索"></a>
+  </nav>
+</div>
+<header id="header" aria-label="Site header">
+        <picture>
+        </picture>
+          <img  fetchpriority="high" src="/images/banner.webp" alt="STM32标准库GPIO">
+  <div id="header-outer">
+    <div id="header-title">
+          <span id="logo">
+            <h1 data-aos="slide-up">STM32标准库GPIO</h1>
+          </span>
+        <h2 id="subtitle-wrap" data-aos="slide-down">
+        </h2>
+    </div>
+  </div>
+</header>
+
+        <div id="content" aria-label="Page content"  class="sidebar-right" >
+          <aside id="sidebar" aria-label="Sidebar">
+  <div class="sidebar-wrapper-container sticky">
+  <div class="sidebar-wrapper">
+    <div class="sidebar-wrap" data-aos="fade-up">
+          <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO"><span class="toc-number">1.</span> <span class="toc-text">STM32标准库GPIO</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8D%E8%BE%93%E5%87%BA%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.</span> <span class="toc-text">介绍输出模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A8%E6%8C%BD%E8%BE%93%E5%87%BA"><span class="toc-number">2.1.</span> <span class="toc-text">推挽输出</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E6%BC%8F%E8%BE%93%E5%87%BA"><span class="toc-number">2.2.</span> <span class="toc-text">开漏输出</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%8D%E7%94%A8%E6%8E%A8%E6%8C%BD%E8%BE%93%E5%87%BA%E5%92%8C%E5%A4%8D%E7%94%A8%E5%BC%80%E6%BC%8F%E8%BE%93%E5%87%BA"><span class="toc-number">2.3.</span> <span class="toc-text">复用推挽输出和复用开漏输出</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BE%93%E5%85%A5%E6%A8%A1%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">输入模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%AE%E7%A9%BA%E8%BE%93%E5%85%A5"><span class="toc-number">3.1.</span> <span class="toc-text">浮空输入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8A%E6%8B%89%E8%BE%93%E5%85%A5"><span class="toc-number">3.2.</span> <span class="toc-text">上拉输入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8B%E6%8B%89%E8%BE%93%E5%85%A5"><span class="toc-number">3.3.</span> <span class="toc-text">下拉输入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E6%8B%9F%E8%BE%93%E5%85%A5"><span class="toc-number">3.4.</span> <span class="toc-text">模拟输入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%8D%E7%94%A8%E8%BE%93%E5%85%A5"><span class="toc-number">3.5.</span> <span class="toc-text">复用输入</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E4%BB%A3%E7%A0%81"><span class="toc-number">4.</span> <span class="toc-text">参考代码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%90%AFgpio%E6%97%B6%E9%92%9F"><span class="toc-number">4.1.</span> <span class="toc-text">开启gpio时钟</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEGPIO%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">4.2.</span> <span class="toc-text">配置GPIO初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GPIO%E8%BE%93%E5%87%BA"><span class="toc-number">4.3.</span> <span class="toc-text">GPIO输出</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GPIO%E8%BE%93%E5%85%A5"><span class="toc-number">4.4.</span> <span class="toc-text">GPIO输入</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BB%B6%E8%BF%9F"><span class="toc-number">5.</span> <span class="toc-text">延迟</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%AF%E4%BB%B6%E5%AE%9E%E7%8E%B0%E5%BB%B6%E8%BF%9F"><span class="toc-number">5.1.</span> <span class="toc-text">软件实现延迟</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SysTick%E5%AE%9E%E7%8E%B0%E5%BB%B6%E8%BF%9F"><span class="toc-number">5.2.</span> <span class="toc-text">SysTick实现延迟</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0ms%E5%92%8Cs"><span class="toc-number">5.3.</span> <span class="toc-text">实现ms和s</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E4%BB%A3%E7%A0%81-1"><span class="toc-number">6.</span> <span class="toc-text">参考代码</span></a></li></ol>
+</div>
+</div>
+          <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="HiW" class="lazyload">
+  <div class="sidebar-author-name">HiW</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">61</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">10</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">15</div>
+  </div>
+</div>
+<div class="sidebar-social" >
+</div>
+<div class="sidebar-menu">
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="首页"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xe3af;
+          </div>
+        <div class="sidebar-menu-link">首页</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf187;
+          </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/about" aria-label="关于"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf05a;
+          </div>
+        <div class="sidebar-menu-link">关于</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf500;
+          </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+</div>
+</div>
+          <div class="sidebar-btn-wrapper" style="position:static">
+            <div class="sidebar-toc-btn current"></div>
+            <div class="sidebar-common-btn"></div>
+          </div>
+    </div>
+  </div>
+  <div class="sidebar-widget">
+  </div>
+  </div>
+</aside>
+
+          <section id="main" aria-label="Main content"><article id="post-stm/标准库/STM32标准库GPIO" class="h-entry article" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner" data-aos="fade-up">
+    <div class="article-meta">
+      <div class="article-date">
+  <span class="article-date-link icon-calendar" data-aos="zoom-in">
+    <time datetime="2024-03-27T02:17:00.000Z" itemprop="datePublished">2024-03-27</time>
+    <time style="display: none;" id="post-update-time">2026-04-20</time>
+  </span>
+</div>
+
+    </div>
+    
+    <div class="hr-line"></div>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+        <p>本教程使用的单片机为stm32f103c8t6</p>
+<h2 id="STM32标准库GPIO"><a href="#STM32标准库GPIO" class="headerlink" title="STM32标准库GPIO"></a>STM32标准库GPIO</h2><p>作为STM32最基本的外设，GPIO最基本的输出功能是由STM32控制 引脚输出高低电平，比如可以把GPIO接LED灯来控制其亮灭，<br>也可以接继电器或者三极管，通过继电器或三极管来控制外部大功率电路的通断。</p>
+<p>这是大概到结构图，看的懂就看，看不懂就算了。<br><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/1.webp"></p>
+<p>STM32一共是有8种模式<br>输入模式：<br>（1）GPIO_Mode_IN_FLOATING 浮空输入<br>（2）GPIO_Mode_IPU 上拉输入<br>（3）GPIO_Mode_IPD 下拉输入<br>（4）GPIO_Mode_AIN 模拟输入<br>输出模式：<br>（5）GPIO_Mode_Out_OD 开漏输出（带上拉或者下拉）<br>（6）GPIO_Mode_AF_OD 复用开漏输出（带上拉或者下拉）<br>（7）GPIO_Mode_Out_PP 推挽输出（带上拉或者下拉）<br>（8）GPIO_Mode_AF_PP 复用推挽输出（带上拉或者下拉）</p>
+<span id="more"></span>
+<h2 id="介绍输出模式"><a href="#介绍输出模式" class="headerlink" title="介绍输出模式"></a>介绍输出模式</h2><h3 id="推挽输出"><a href="#推挽输出" class="headerlink" title="推挽输出"></a>推挽输出</h3><p><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/2.webp"></p>
+<p>既能主动拉高电平到 VDD，也能主动拉低电平到 GND，高低电平都由内部电路直接驱动</p>
+<p>由N-MOS和P-MOS控制</p>
+<h3 id="开漏输出"><a href="#开漏输出" class="headerlink" title="开漏输出"></a>开漏输出</h3><p><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/3.webp"><br>只能主动拉低电平到 GND，无法主动输出高电平；高电平必须依靠外部上拉电阻实现<br>高电平相当接了一个无穷大的电阻<br>低电平就是连接GND</p>
+<p>只由N-MOS控制</p>
+<h3 id="复用推挽输出和复用开漏输出"><a href="#复用推挽输出和复用开漏输出" class="headerlink" title="复用推挽输出和复用开漏输出"></a>复用推挽输出和复用开漏输出</h3><p><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/7.webp"></p>
+<p>复用相当是引用其他引脚控制，相当于是变成其他引脚。<br>实现的功能效果和上面一样</p>
+<h2 id="输入模式"><a href="#输入模式" class="headerlink" title="输入模式"></a>输入模式</h2><h3 id="浮空输入"><a href="#浮空输入" class="headerlink" title="浮空输入"></a>浮空输入</h3><p><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/8.webp"></p>
+<p>浮空输入就是不经过任何上下拉电阻，直接进行读取电平容易被干扰<br>适合需要自己外部上下拉的情况</p>
+<h3 id="上拉输入"><a href="#上拉输入" class="headerlink" title="上拉输入"></a>上拉输入</h3><p><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/9.webp"><br>上拉就是接了上拉电阻<br>悬空的时候是高电平</p>
+<h3 id="下拉输入"><a href="#下拉输入" class="headerlink" title="下拉输入"></a>下拉输入</h3><p><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/10.webp"><br>下拉就是接了下拉电阻<br>悬空的时候就是低电平</p>
+<h3 id="模拟输入"><a href="#模拟输入" class="headerlink" title="模拟输入"></a>模拟输入</h3><p><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/11.webp"><br>唯一作用是接收、采集「连续变化的模拟电压信号」<br>给ADC用的</p>
+<h3 id="复用输入"><a href="#复用输入" class="headerlink" title="复用输入"></a>复用输入</h3><p>(*´･д･)?</p>
+<p>额STM32标准库没有这东西。你问我为没什么，可以st觉得没必要做吧</p>
+<h2 id="参考代码"><a href="#参考代码" class="headerlink" title="参考代码"></a>参考代码</h2><p>下面内容建议配合代码查看（stm32f103c8t6）<br>配置GPIO步骤</p>
+<p>1 开启gpio时钟<br>2 配置GPIO初始化<br>3 调用</p>
+<h3 id="开启gpio时钟"><a href="#开启gpio时钟" class="headerlink" title="开启gpio时钟"></a>开启gpio时钟</h3><p>而相对应的外设功能所使用的时钟 在stm32f4xx.h 中即可查看到</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RCC_AHB1PeriphClockCmd ( RCC_AHB1Periph_GPIOX, ENABLE);     /*开启 AHB1时钟*/</span><br></pre></td></tr></table></figure>
+<p>X是选择引脚组<br>ENABLE开<br>DISABLE 关</p>
+<p>RCC_AHB1<br><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/4.webp"></p>
+<p>RCC_APB1<br><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/5.webp"></p>
+<h3 id="配置GPIO初始化"><a href="#配置GPIO初始化" class="headerlink" title="配置GPIO初始化"></a>配置GPIO初始化</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GPIO_Init(GPIOX, &amp;GPIO_InitStructure);    //初始化所设置的引脚</span><br></pre></td></tr></table></figure>
+<p>X是初始化引脚组为ABCD等组<br>GPIO_InitStructure 是结构体<br>用于初始化</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GPIO_InitTypeDef GPIO_InitStruct;                    //定义初始化结构体</span><br></pre></td></tr></table></figure>
+<p>定义完结构体后就可以对结构体进行配置</p>
+<p>GPIO_InitStruct.GPIO_Mode    &#x3D; x;     &#x2F;&#x2F;配置模式模式上面有<br>GPIO_InitStruct.GPIO_Pin     &#x3D; GPIO_Pin_X;           &#x2F;&#x2F;配置哪个IO口一共有1到16个引脚<br>GPIO_InitStruct.GPIO_Speed   &#x3D; GPIO_Speed_xMHz;     &#x2F;&#x2F;配置IO口速度,仅输出有效</p>
+<p>gpio的速度<br><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/6.webp"></p>
+<h3 id="GPIO输出"><a href="#GPIO输出" class="headerlink" title="GPIO输出"></a>GPIO输出</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GPIO_ResetBits(GPIOX, GPIO_Pin_X);  //X组，x引脚  gpio引脚低电平</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GPIO_SetBits(GPIOX, GPIO_Pin_X);  //X组，x引脚  gpio引脚高电平</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GPIO_SetBits(GPIOX, GPIO_Pin_X);  //X组，x引脚  gpio引脚高电平</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GPIO_WriteBit(GPIOX, GPIO_Pin_X, Bit_RESET);//X组，x引脚  gpio引脚低电平</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GPIO_WriteBit(GPIOX, GPIO_Pin_X,  Bit_SET);//X组，x引脚  gpio引脚高电平</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GPIO_WriteBit(GPIOX, GPIO_Pin_X, X);//X组，x引脚 X可以为高低电平</span><br></pre></td></tr></table></figure>
+
+<h3 id="GPIO输入"><a href="#GPIO输入" class="headerlink" title="GPIO输入"></a>GPIO输入</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GPIO_ReadInputDataBit(GPIOX, GPIO_Pin_X) //X为组 X为引脚</span><br></pre></td></tr></table></figure>
+<p>这个就可以检测高低电平用if判断上面的函数为1或者0就是高或者低</p>
+<h2 id="延迟"><a href="#延迟" class="headerlink" title="延迟"></a>延迟</h2><p>STM32标准库并没有提供延迟有关的函数<br>需要客户自己去建立函数</p>
+<h3 id="软件实现延迟"><a href="#软件实现延迟" class="headerlink" title="软件实现延迟"></a>软件实现延迟</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">void Delay_us(uint32_t xus)</span><br><span class="line">&#123;</span><br><span class="line">    volatile uint32_t Delay = nus * 72 / 4;  // volatile 防止被优化</span><br><span class="line">    do</span><br><span class="line">    &#123;</span><br><span class="line">        __NOP();</span><br><span class="line">    &#125; while (Delay--);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 通用公式：</span><br><span class="line">Delay = nus * 系统时钟(MHz) / 4;</span><br></pre></td></tr></table></figure>
+<p>这种延迟可以在中断里面运行，但是不准而且没法校准</p>
+<h3 id="SysTick实现延迟"><a href="#SysTick实现延迟" class="headerlink" title="SysTick实现延迟"></a>SysTick实现延迟</h3><p>SysTick，是一个24位倒计数定时器，当他计数到0就会RELOAD寄存器中自动重装载定时初值<br>只要把它在SysTick-&gt;CTRL中的使能位清除，则一直存在。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">void Delay_us(uint32_t xus)</span><br><span class="line">&#123;</span><br><span class="line">	if(xus &gt; 233000) xus = 233000; //防止溢出最大只能233ms</span><br><span class="line">	SysTick-&gt;LOAD = 72 * xus;				//设置定时器重装值</span><br><span class="line">	SysTick-&gt;VAL = 0x00;					//清空当前计数值</span><br><span class="line">	SysTick-&gt;CTRL = 0x00000005;				//设置时钟源为HCLK，启动定时器</span><br><span class="line">	while(!(SysTick-&gt;CTRL &amp; 0x00010000));	//等待计数到0</span><br><span class="line">	SysTick-&gt;CTRL = 0x00000004;				//关闭定时器</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// 通用公式：</span><br><span class="line">SysTick-&gt;LOAD = 系统时钟(MHz) * xus;</span><br><span class="line"></span><br><span class="line">这种延迟他虽然准，但是无法在中断里面运行</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="实现ms和s"><a href="#实现ms和s" class="headerlink" title="实现ms和s"></a>实现ms和s</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">void Delay_ms(uint32_t xs)</span><br><span class="line">&#123;</span><br><span class="line">	while(xs--)</span><br><span class="line">	&#123;</span><br><span class="line">		Delay_us(1000);</span><br><span class="line">	&#125;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">void Delay_s(uint32_t xs)</span><br><span class="line">&#123;</span><br><span class="line">	while(xs--)</span><br><span class="line">	&#123;</span><br><span class="line">		Delay_ms(1000);</span><br><span class="line">	&#125;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+
+<h2 id="参考代码-1"><a href="#参考代码-1" class="headerlink" title="参考代码"></a>参考代码</h2><figure class="highlight c"><figcaption><span>main.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;stm32f10x.h&quot;</span>                  <span class="comment">// Device header</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">Delay_us</span><span class="params">(<span class="type">uint32_t</span> xus)</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">Delay_ms</span><span class="params">(<span class="type">uint32_t</span> xs)</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    GPIO_InitTypeDef GPIO_InitStructure; <span class="comment">//定义结构体</span></span><br><span class="line">    GPIO_InitTypeDef GPIO_InitStructures; <span class="comment">//定义结构体</span></span><br><span class="line">    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE); <span class="comment">//开启时钟</span></span><br><span class="line">    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);</span><br><span class="line"></span><br><span class="line">    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; <span class="comment">//推挽输出</span></span><br><span class="line">    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13; <span class="comment">//io</span></span><br><span class="line">    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; <span class="comment">//频率</span></span><br><span class="line">    GPIO_Init(GPIOC, &amp; GPIO_InitStructure);</span><br><span class="line"></span><br><span class="line">    GPIO_InitStructures.GPIO_Mode = GPIO_Mode_IPU; <span class="comment">//上拉输入</span></span><br><span class="line">    GPIO_InitStructures.GPIO_Pin = GPIO_Pin_14; <span class="comment">//io</span></span><br><span class="line">    GPIO_InitStructures.GPIO_Speed = GPIO_Speed_50MHz; <span class="comment">//频率</span></span><br><span class="line">    GPIO_Init(GPIOB, &amp; GPIO_InitStructures);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">        GPIO_SetBits(GPIOC, GPIO_Pin_13); <span class="comment">//默认io为高电平</span></span><br><span class="line">        <span class="keyword">if</span> (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_14) == <span class="number">0</span>) <span class="comment">//A0等于低电平</span></span><br><span class="line">        &#123;</span><br><span class="line">            Delay_us(<span class="number">5000</span>);</span><br><span class="line">            <span class="keyword">if</span> (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_14) == <span class="number">0</span>) &#123;</span><br><span class="line">                GPIO_ResetBits(GPIOC, GPIO_Pin_13); <span class="comment">//C13为低电平 控制led亮</span></span><br><span class="line">                Delay_ms(<span class="number">1000</span>);</span><br><span class="line">                &#123;&#125;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">Delay_us</span><span class="params">(<span class="type">uint32_t</span> xus)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (xus &gt; <span class="number">233000</span>) xus = <span class="number">233000</span>; <span class="comment">//防止溢出最大只能233ms</span></span><br><span class="line">    SysTick -&gt; LOAD = <span class="number">72</span> * xus; <span class="comment">//设置定时器重装值</span></span><br><span class="line">    SysTick -&gt; VAL = <span class="number">0x00</span>; <span class="comment">//清空当前计数值</span></span><br><span class="line">    SysTick -&gt; CTRL = <span class="number">0x00000005</span>; <span class="comment">//设置时钟源为HCLK，启动定时器</span></span><br><span class="line">    <span class="keyword">while</span> (!(SysTick -&gt; CTRL &amp; <span class="number">0x00010000</span>)); <span class="comment">//等待计数到0</span></span><br><span class="line">    SysTick -&gt; CTRL = <span class="number">0x00000004</span>; <span class="comment">//关闭定时器</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">Delay_ms</span><span class="params">(<span class="type">uint32_t</span> xs)</span> &#123;</span><br><span class="line">    <span class="keyword">while</span> (xs--) &#123;</span><br><span class="line">        Delay_us(<span class="number">1000</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>参考工程：<br><a target="_blank" rel="noopener" href="https://wwm.lanzouq.com/b03lno3za">https://wwm.lanzouq.com/b03lno3za</a><br>密码:6jed</p>
+
+    </div>
+    <footer class="article-footer">
+        <a class="article-category-link" href="/categories/STM32/" title="STM32" data-aos="zoom-in">STM32</a>
+
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="/tags/STM32/" rel="tag" title="STM32">STM32</a></li></ul>
+
+    </footer>
+  </div>
+    <nav id="article-nav" aria-label="Article navigation" data-aos="fade-up">
+      <div class="article-nav-link-wrap left">
+            <img data-src="/covers/6.webp" data-sizes="auto" alt="openharmony用ubuntu源码下载" class="lazyload">
+        <a href="/2024/09/12/openharmony/openharmony%E7%94%A8ubuntu%E6%BA%90%E7%A0%81%E4%B8%8B%E8%BD%BD/" aria-label="前一篇: openharmony用ubuntu源码下载" title="前一篇: openharmony用ubuntu源码下载"></a>
+        <div class="article-nav-caption">前一篇</div>
+        <h3 class="article-nav-title">
+            openharmony用ubuntu源码下载
+        </h3>
+      </div>
+    <div class="article-nav-link-wrap right">
+          <img data-src="/covers/4.webp" data-sizes="auto" alt="Keil介绍" class="lazyload">
+      <a href="/2024/03/26/stm/Keil%E4%BB%8B%E7%BB%8D/" aria-label="后一篇: Keil介绍"  title="后一篇: Keil介绍"></a>
+      <div class="article-nav-caption">后一篇</div>
+      <h3 class="article-nav-title">
+          Keil介绍
+      </h3>
+    </div>
+  </nav>
+
+</article>
+
+
+</section>
+        </div>
+        <footer id="footer" aria-label="Site footer">
+  <div style="width: 100%; overflow: hidden">
+    <div class="footer-line"></div>
+  </div>
+  <div id="footer-info">
+    <div>
+      <span class="icon-copyright"></span>
+        2020-2026
+        <span class="footer-info-sep rotate"></span>
+      HiW
+    </div>
+  </div>
+</footer>
+
+          <div class="sidebar-top">
+            <div class="sidebar-top-taichi rotate"></div>
+            <div class="arrow-up"></div>
+          </div>
+        <div id="mask" class="hide"></div>
+      </div>
+      <nav id="mobile-nav" aria-label="Mobile navigation">
+  <div class="sidebar-wrap">
+        <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO"><span class="toc-number">1.</span> <span class="toc-text">STM32标准库GPIO</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8D%E8%BE%93%E5%87%BA%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.</span> <span class="toc-text">介绍输出模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A8%E6%8C%BD%E8%BE%93%E5%87%BA"><span class="toc-number">2.1.</span> <span class="toc-text">推挽输出</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E6%BC%8F%E8%BE%93%E5%87%BA"><span class="toc-number">2.2.</span> <span class="toc-text">开漏输出</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%8D%E7%94%A8%E6%8E%A8%E6%8C%BD%E8%BE%93%E5%87%BA%E5%92%8C%E5%A4%8D%E7%94%A8%E5%BC%80%E6%BC%8F%E8%BE%93%E5%87%BA"><span class="toc-number">2.3.</span> <span class="toc-text">复用推挽输出和复用开漏输出</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BE%93%E5%85%A5%E6%A8%A1%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">输入模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%AE%E7%A9%BA%E8%BE%93%E5%85%A5"><span class="toc-number">3.1.</span> <span class="toc-text">浮空输入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8A%E6%8B%89%E8%BE%93%E5%85%A5"><span class="toc-number">3.2.</span> <span class="toc-text">上拉输入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8B%E6%8B%89%E8%BE%93%E5%85%A5"><span class="toc-number">3.3.</span> <span class="toc-text">下拉输入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E6%8B%9F%E8%BE%93%E5%85%A5"><span class="toc-number">3.4.</span> <span class="toc-text">模拟输入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%8D%E7%94%A8%E8%BE%93%E5%85%A5"><span class="toc-number">3.5.</span> <span class="toc-text">复用输入</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E4%BB%A3%E7%A0%81"><span class="toc-number">4.</span> <span class="toc-text">参考代码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%90%AFgpio%E6%97%B6%E9%92%9F"><span class="toc-number">4.1.</span> <span class="toc-text">开启gpio时钟</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEGPIO%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">4.2.</span> <span class="toc-text">配置GPIO初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GPIO%E8%BE%93%E5%87%BA"><span class="toc-number">4.3.</span> <span class="toc-text">GPIO输出</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GPIO%E8%BE%93%E5%85%A5"><span class="toc-number">4.4.</span> <span class="toc-text">GPIO输入</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BB%B6%E8%BF%9F"><span class="toc-number">5.</span> <span class="toc-text">延迟</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%AF%E4%BB%B6%E5%AE%9E%E7%8E%B0%E5%BB%B6%E8%BF%9F"><span class="toc-number">5.1.</span> <span class="toc-text">软件实现延迟</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SysTick%E5%AE%9E%E7%8E%B0%E5%BB%B6%E8%BF%9F"><span class="toc-number">5.2.</span> <span class="toc-text">SysTick实现延迟</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0ms%E5%92%8Cs"><span class="toc-number">5.3.</span> <span class="toc-text">实现ms和s</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E4%BB%A3%E7%A0%81-1"><span class="toc-number">6.</span> <span class="toc-text">参考代码</span></a></li></ol>
+</div>
+</div>
+        <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="HiW" class="lazyload">
+  <div class="sidebar-author-name">HiW</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">61</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">10</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">15</div>
+  </div>
+</div>
+<div class="sidebar-social" >
+</div>
+<div class="sidebar-menu">
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="首页"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xe3af;
+          </div>
+        <div class="sidebar-menu-link">首页</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf187;
+          </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/about" aria-label="关于"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf05a;
+          </div>
+        <div class="sidebar-menu-link">关于</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf500;
+          </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+</div>
+</div>
+  </div>
+      <div class="sidebar-btn-wrapper">
+        <div class="sidebar-toc-btn current"></div>
+        <div class="sidebar-common-btn"></div>
+      </div>
+</nav>
+
+    </div>
+      <div class="site-search">
+        <div class="reimu-popup popup">
+          <div class="reimu-search">
+            <div class="reimu-search-input-icon"></div>
+            <div id="reimu-search-input"></div>
+            <div class="popup-btn-close"></div>
+          </div>
+          <div class="reimu-results">
+            <div id="reimu-stats"></div>
+            <div id="reimu-hits"></div>
+            <div id="reimu-pagination" class="reimu-pagination"></div>
+          </div>
+          <img class="reimu-bg" src="/images/reimu.png" loading="lazy" decoding="async" fetchpriority="low"/>
+        </div>
+      </div>
+    
+<script src="https://npm.webcache.cn/lazysizes@5.3.2/lazysizes.min.js" integrity="sha384-3gT&#x2F;vsepWkfz&#x2F;ff7PpWNUeMzeWoH3cDhm&#x2F;A8jM7ouoAK0&#x2F;fP&#x2F;9bcHHR5kHq2nf+e" crossorigin="anonymous"></script>
+
+
+<script src="https://npm.webcache.cn/clipboard@2.0.11/dist/clipboard.min.js" integrity="sha384-J08i8An&#x2F;QeARD9ExYpvphB8BsyOj3Gh2TSh1aLINKO3L0cMSH2dN3E22zFoXEi0Q" crossorigin="anonymous"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+  
+<script src="/js/aos.js"></script>
+
+  <script>
+    var aosInit = () => {
+      AOS.init({
+        duration: 1000,
+        easing: "ease",
+        once: true,
+        offset: 50,
+      });
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', aosInit);
+    } else {
+      aosInit();
+    }
+  </script>
+
+
+<script src="/js/pjax_script.js" data-pjax></script>
+
+
+
+  <script>
+    var ALGOLIA_CONFIG = {
+      logo: "/images/algolia_logo.svg",
+      algolia: {
+        applicationID: "29NDGCSMY6",
+        apiKey: "6d330d43eefc2a0de625b8b431bcb121",
+        indexName: "binging",
+        hits: {
+          "per_page": parseInt("10")
+        },
+        labels: {
+          "input_placeholder": "搜索.....",
+          "hits_empty": "未发现与 「${query}」相关内容",
+          "hits_stats": "找到${hits}条结果（用时 ${time} ms）"
+        }
+      }
+    };
+  </script>
+  
+<script src="https://npm.webcache.cn/algoliasearch@4.17.1/dist/algoliasearch-lite.umd.js" integrity="sha384-xvLS0jfKuoREs7pqkRI&#x2F;OI8GcqohO5S+jQz7ZBtQXnsXmD+9jDOOY4cL6dCPzlrk" crossorigin="anonymous" defer></script>
+
+  
+<script src="https://npm.webcache.cn/@reimujs/instantsearch.js@4.57.0-beta.1/dist/instantsearch.production.min.js" integrity="sha384-aagKMe8nkqaP2DYQc8kkYOL5l+M5Q2WH&#x2F;Uhr4teOh0Ybp0RZj0kUSDm45qPikMjK" crossorigin="anonymous" defer></script>
+
+  
+<script src="/js/algolia_search.js" defer></script>
+
+
+  <script>
+    var setupFirework = () => {
+      if (!false || !window.matchMedia('(max-width: 768px)').matches) {
+        window.firework && window.firework(JSON.parse('{"excludeElements":["a","button"],"particles":[{"shape":"circle","move":["emit"],"easing":"easeOutExpo","colors":["var(--red-1)","var(--red-2)","var(--red-3)","var(--red-4)"],"number":20,"duration":[1200,1800],"shapeOptions":{"radius":[16,32],"alpha":[0.3,0.5]}},{"shape":"circle","move":["diffuse"],"easing":"easeOutExpo","colors":["var(--red-0)"],"number":1,"duration":[1200,1800],"shapeOptions":{"radius":20,"alpha":[0.2,0.5],"lineWidth":6}}]}'));
+      }
+    }
+  </script>
+  
+<script src="https://npm.webcache.cn/mouse-firework@0.2.0/dist/index.umd.js" integrity="sha384-qi9WggRt19tv8Vc7pCHW3ulMNLwrn515zaLEWZjl1px07vz8+pUoWX8n1rgq282T" crossorigin="anonymous" onload="setupFirework()" defer></script>
+
+
+
+
+
+
+<div id="lazy-script">
+  <div>
+      
+      
+      <script data-pjax>
+        window.REIMU_POST = {
+          author: "HiW",
+          title: "STM32标准库GPIO",
+          url: "https://binging.top/2024/03/27/stm/%E6%A0%87%E5%87%86%E5%BA%93/STM32%E6%A0%87%E5%87%86%E5%BA%93GPIO/",
+          excerpt: "本教程使用的单片机为stm32f103c8t6 STM32标准库GPIO作为STM32最基本的外设，GPIO最基本的输出功能是由STM32控制 引脚输出高低电平，比如可以把GPIO接LED灯来控制其亮灭，也可以接继电器或者三极管，通过继电器或三极管来控制外部大功率电路的通断。 这是大概到结构图，看的懂就看，看不懂就算了。 STM32一共是有8种模式输入模式：（1）GPIO_Mode_IN_FLOATING 浮空输入（2）GPIO_Mode_IPU 上拉输入（3）GPIO_Mode_IPD 下拉输入（4）GPIO_Mode_AIN 模拟输入输出模式：（5）GPIO_Mode_Out_OD 开漏输出（带上拉或者下拉）（6）GPIO_Mode_AF_OD 复用开漏输出（带上拉或者下拉）（7）GPIO_Mode_Out_PP 推挽输出（带上拉或者下拉）（8）GPIO_Mode_AF_PP 复用推挽输出（带上拉或者下拉）",
+          description: "",
+          stripContent: "本教程使用的单片机为stm32f103c8t6 STM32标准库GPIO作为STM32最基本的外设，GPIO最基本的输出功能是由STM32控制 引脚输出高低电平，比如可以把GPIO接LED灯来控制其亮灭，也可以接继电器或者三极管，通过继电器或三极管来控制外部大功率电路的通断。 这是大概到结构图，看的懂就看，看不懂就算了。 STM32一共是有8种模式输入模式：（1）GPIO_Mode_IN_FLOATING 浮空输入（2）GPIO_Mode_IPU 上拉输入（3）GPIO_Mode_IPD 下拉输",
+          date: "Wed Mar 27 2024 10:17:00 GMT+0800",
+          updated: "Mon Apr 20 2026 15:56:00 GMT+0800",
+          cover: "/images/banner.webp",
+        };
+      </script>
+        
+<script src="/js/insert_highlight.js" data-pjax></script>
+
+      
+<script src="/js/tabs.js" data-pjax defer></script>
+
+      <script type="module" data-pjax>
+        (async () => {
+          const PhotoSwipeLightbox = (await safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.min.js", "sha384-DiL6M/gG+wmTxmCRZyD1zee6lIhawn5TGvED0FOh7fXcN9B0aZ9dexSF/N6lrZi/")).default;
+          const initPswp = (gallery, children) => {
+            if (_$$(`${gallery} ${children}`).length > 0) {
+              new PhotoSwipeLightbox({
+                gallery,
+                children,
+                pswpModule: () => safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.esm.min.js", "sha384-WkkO3GCmgkC3VQWpaV8DqhKJqpzpF9JoByxDmnV8+oTJ7m3DfYEWX1fu1scuS4+s")
+              }).init();
+            }
+          }
+          const pswp = () => {
+            initPswp('.article-entry', 'a.article-gallery-item');
+            initPswp('.article-gallery', 'a.article-gallery-item');
+          }
+          pswp();
+        })();
+      </script>
+        
+
+
+  </div>
+</div>
+
+
+  <script>
+    console.log(String.raw`%c 
+ ______     ______     __     __    __     __  __    
+/\  == \   /\  ___\   /\ \   /\ "-./  \   /\ \/\ \   
+\ \  __<   \ \  __\   \ \ \  \ \ \-./\ \  \ \ \_\ \  
+ \ \_\ \_\  \ \_____\  \ \_\  \ \_\ \ \_\  \ \_____\ 
+  \/_/ /_/   \/_____/   \/_/   \/_/  \/_/   \/_____/ 
+                                                  
+`,'color: #ff5252;')
+    console.log('%c Theme.Reimu v' + '1.12.3' + ' %c https://github.com/D-Sketon/hexo-theme-reimu ', 'color: white; background: #ff5252; padding:5px 0;', 'padding:4px;border:1px solid #ff5252;')
+  </script>
+  
+
+
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
+</script>
+
+
+
+
+  </body>
+  </html>

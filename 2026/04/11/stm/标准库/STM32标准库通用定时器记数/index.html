@@ -1,0 +1,885 @@
+  <!DOCTYPE html>
+  <html lang="zh-CN"  
+      data-theme-mode="auto"
+  >
+  <head>
+  <meta charset="utf-8">
+  
+  
+  
+  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN":"复制成功 (*^▽^*)"},"fail":{"zh-CN":"复制失败 (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'https://binging.top';</script>
+  <title>
+    STM32标准库通用定时器记数 | Binging
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic|Noto Serif SC:400,400italic,700,700italic&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic|Noto Serif SC:400,400italic,700,700italic&display=swap" media="print" onload="this.media='all'">
+    
+<link rel="stylesheet" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/regular.min.css" integrity="sha384-4qYppzjH8EiA+cGdaubu2vL7Rk8WGiqCSj7oRuP1uwtFWkfKNHD20lPfcrbQc8dU" crossorigin="anonymous">
+<link rel="stylesheet" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/solid.min.css" integrity="sha384-wbMWab3UDSPm2kvIgVOn&#x2F;d9KPTecgPU1+Nb3zoQrm&#x2F;oVu0EkPL6IaKinjbwW0rum" crossorigin="anonymous">
+
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/brands.min.css" integrity="sha384-KTGeC2hIMzpeQakhsmzB9bZfhCD5xZZCgI1iZH6f/O457SxzlkzTQg/WXFNoi3ih" crossorigin="anonymous">
+<link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/v5-font-face.min.css" integrity="sha384-nJ1ThfldViXoLpJ6jlKcP2beas8BMbYq26SG9Hi8cH89bZi4RZ644v7helMCqJxd" crossorigin="anonymous">
+<link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/v4-font-face.min.css" integrity="sha384-UlkrhOIvZxJFd4MElSUp7ow6/RUeYKi/orfCZIRRiOENFuQPIAA3T3HjYfmBRhNq" crossorigin="anonymous">
+    
+<link rel="stylesheet" href="/css/loader.css">
+
+    <meta name="description" content="上期我们讲了STM32标准库基本定时器 这个图看起来很复杂其实也就这样（你知道我想说什么） 上期我们说过通用定时器里面包含了基本定时器所以我们上一期其实是只用了这个部分 然后本篇我们先讲的通用定时器计数因为定时器说白了就是记录时钟的信号。如果改成外部的话那么就可以记录外部的波的数据 我们先说第一个方法使用ETR 方法1：ETR ETR主要用这通用定时器的这些部分 但是STM32的ETR引脚不多虽然">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STM32标准库通用定时器记数">
+<meta property="og:url" content="https://binging.top/2026/04/11/stm/%E6%A0%87%E5%87%86%E5%BA%93/STM32%E6%A0%87%E5%87%86%E5%BA%93%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8%E8%AE%B0%E6%95%B0/index.html">
+<meta property="og:site_name" content="Binging">
+<meta property="og:description" content="上期我们讲了STM32标准库基本定时器 这个图看起来很复杂其实也就这样（你知道我想说什么） 上期我们说过通用定时器里面包含了基本定时器所以我们上一期其实是只用了这个部分 然后本篇我们先讲的通用定时器计数因为定时器说白了就是记录时钟的信号。如果改成外部的话那么就可以记录外部的波的数据 我们先说第一个方法使用ETR 方法1：ETR ETR主要用这通用定时器的这些部分 但是STM32的ETR引脚不多虽然">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8%E8%AE%B0%E6%95%B0/1.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8%E8%AE%B0%E6%95%B0/2.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8%E8%AE%B0%E6%95%B0/3.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8%E8%AE%B0%E6%95%B0/4.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8%E8%AE%B0%E6%95%B0/5.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8%E8%AE%B0%E6%95%B0/6.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8%E8%AE%B0%E6%95%B0/7.webp">
+<meta property="article:published_time" content="2026-04-11T02:35:00.000Z">
+<meta property="article:modified_time" content="2026-04-12T11:10:52.610Z">
+<meta property="article:author" content="HiW">
+<meta property="article:tag" content="STM32">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://binging.top/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8%E8%AE%B0%E6%95%B0/1.webp">
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.css" integrity="sha384-IfxC36XL/toUyJ939C73PcgMuRzAZuIzZxE38drsmO5p6jD7ei+Zx/1oA/0l8ysE" crossorigin="anonymous">
+    
+<script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous"></script>
+
+    
+<link rel="stylesheet" href="https://npm.webcache.cn/@reimujs/aos@0.1.2/dist/aos.css" integrity="sha384-GMRP93c6Hkz9JVKGAuRR3nTS7M07RwPgTFenXiosjq2VbVgvdDNcz1g6Mkj8AONa" crossorigin="anonymous">
+
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+  <body>
+      <div id='loader'>
+    <div class="loading-left-bg loading-bg"></div>
+    <div class="loading-right-bg loading-bg"></div>
+    <div class="spinner-box">
+      <div class="loading-taichi rotate">
+          <svg width="150" height="150" viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="https://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+            <path d="M303.5 432A80 80 0 0 1 291.5 592A80 80 0 0 1 303.5 432z" fill="var(--red-1, #ff5252)" />
+            <path d="M512 65A447 447 0 0 1 512 959L512 929A417 417 0 0 0 512 95A417 417 0 0 0 512 929L512 959A447 447 0 0 1 512 65z 
+           M512 95A417 417 0 0 1 929 512A208.5 208.5 0 0 1 720.5 720.5L720.5 592A80 80 0 0 0 720.5 432A80 80 0 0 0 720.5 592L720.5 720.5A208.5 208.5 0 0 1 512 512A208.5 208.5 0 0 0 303.5 303.5A208.5 208.5 0 0 0 95 512A417 417 0 0 1 512 95z" fill="var(--red-1, #ff5252)" />
+          </svg>
+      </div>
+      <div class="loading-word">少女祈祷中...</div>
+    </div>
+  </div>
+  <script>
+    var time = null;
+    var loaderEl = document.getElementById('loader');
+    var startLoading = () => {
+      time = Date.now();
+      loaderEl.classList.remove("loading");
+    }
+    var hideLoader = () => {
+      document.body.style.overflow = 'auto';
+      loader.classList.add('loading');
+    };
+
+    var endLoading = () => {
+      if (!time) {
+        hideLoader();
+      } else {
+        if (Date.now() - time > 500) {
+          time = null;
+          hideLoader();
+        } else {
+          setTimeout(endLoading, 500 - (Date.now() - time));
+          time = null;
+        }
+      }
+    }
+    window.addEventListener('DOMContentLoaded', endLoading);
+    loaderEl.addEventListener('click', endLoading);
+  </script>
+<div id="copy-tooltip"></div>
+<div id="heatmap-tooltip"></div>
+
+
+    <div id="container">
+      <div id="wrap">
+        <div id="header-nav">
+  <nav id="main-nav" aria-label="Primary navigation">
+        <a class="main-nav-link-wrap" href="/">
+            <div class="main-nav-icon icon ">
+                  &#xe3af;
+            </div>
+          <span class="main-nav-link">首页</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/archives">
+            <div class="main-nav-icon icon ">
+                  &#xf187;
+            </div>
+          <span class="main-nav-link">归档</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/about">
+            <div class="main-nav-icon icon ">
+                  &#xf05a;
+            </div>
+          <span class="main-nav-link">关于</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/friend">
+            <div class="main-nav-icon icon ">
+                  &#xf500;
+            </div>
+          <span class="main-nav-link">友链</span>
+        </a>
+    <a id="main-nav-toggle" class="nav-icon" aria-label="Toggle navigation" role="button"></a>
+  </nav>
+  <nav id="sub-nav" aria-label="Secondary navigation">
+      <a id="nav-search-btn" class="nav-icon popup-trigger" title="搜索" aria-label="搜索"></a>
+  </nav>
+</div>
+<header id="header" aria-label="Site header">
+        <picture>
+        </picture>
+          <img  fetchpriority="high" src="/images/banner.webp" alt="STM32标准库通用定时器记数">
+  <div id="header-outer">
+    <div id="header-title">
+          <span id="logo">
+            <h1 data-aos="slide-up">STM32标准库通用定时器记数</h1>
+          </span>
+        <h2 id="subtitle-wrap" data-aos="slide-down">
+        </h2>
+    </div>
+  </div>
+</header>
+
+        <div id="content" aria-label="Page content"  class="sidebar-right" >
+          <aside id="sidebar" aria-label="Sidebar">
+  <div class="sidebar-wrapper-container sticky">
+  <div class="sidebar-wrapper">
+    <div class="sidebar-wrap" data-aos="fade-up">
+          <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%B3%951%EF%BC%9AETR"><span class="toc-number">1.</span> <span class="toc-text">方法1：ETR</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E4%BB%A3%E7%A0%81%E5%87%BD%E6%95%B0"><span class="toc-number">1.1.</span> <span class="toc-text">参考代码函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96ETR"><span class="toc-number">1.1.1.</span> <span class="toc-text">初始化ETR</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96CNT%E5%80%BC"><span class="toc-number">1.1.2.</span> <span class="toc-text">读取CNT值</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AECNT%E5%80%BC"><span class="toc-number">1.1.3.</span> <span class="toc-text">设置CNT值</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E4%BB%A3%E7%A0%81"><span class="toc-number">1.2.</span> <span class="toc-text">参考代码</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%B3%952%EF%BC%9ATIX"><span class="toc-number">2.</span> <span class="toc-text">方法2：TIX</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E4%BB%A3%E7%A0%81%E5%87%BD%E6%95%B0-1"><span class="toc-number">2.1.</span> <span class="toc-text">参考代码函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8"><span class="toc-number">2.1.1.</span> <span class="toc-text">初始化通用定时器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E5%AF%84%E5%AD%98%E5%99%A8%E5%87%BD%E6%95%B0"><span class="toc-number">2.1.2.</span> <span class="toc-text">读取寄存器函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%BE%E5%AE%9A%E5%AF%84%E5%AD%98%E5%99%A8CCR"><span class="toc-number">2.1.3.</span> <span class="toc-text">设定寄存器CCR</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E4%BB%A3%E7%A0%81-1"><span class="toc-number">3.</span> <span class="toc-text">参考代码</span></a></li></ol>
+</div>
+</div>
+          <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="HiW" class="lazyload">
+  <div class="sidebar-author-name">HiW</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">61</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">10</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">15</div>
+  </div>
+</div>
+<div class="sidebar-social" >
+</div>
+<div class="sidebar-menu">
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="首页"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xe3af;
+          </div>
+        <div class="sidebar-menu-link">首页</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf187;
+          </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/about" aria-label="关于"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf05a;
+          </div>
+        <div class="sidebar-menu-link">关于</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf500;
+          </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+</div>
+</div>
+          <div class="sidebar-btn-wrapper" style="position:static">
+            <div class="sidebar-toc-btn current"></div>
+            <div class="sidebar-common-btn"></div>
+          </div>
+    </div>
+  </div>
+  <div class="sidebar-widget">
+  </div>
+  </div>
+</aside>
+
+          <section id="main" aria-label="Main content"><article id="post-stm/标准库/STM32标准库通用定时器记数" class="h-entry article" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner" data-aos="fade-up">
+    <div class="article-meta">
+      <div class="article-date">
+  <span class="article-date-link icon-calendar" data-aos="zoom-in">
+    <time datetime="2026-04-11T02:35:00.000Z" itemprop="datePublished">2026-04-11</time>
+    <time style="display: none;" id="post-update-time">2026-04-12</time>
+  </span>
+</div>
+
+    </div>
+    
+    <div class="hr-line"></div>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+        <p>上期我们讲了<a href="/2026/04/10/stm/%E6%A0%87%E5%87%86%E5%BA%93/STM32%E6%A0%87%E5%87%86%E5%BA%93%E5%9F%BA%E6%9C%AC%E5%AE%9A%E6%97%B6%E5%99%A8/" title="STM32标准库基本定时器">STM32标准库基本定时器</a></p>
+<p><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8%E8%AE%B0%E6%95%B0/1.webp"><br>这个图看起来很复杂<br>其实也就这样（你知道我想说什么）</p>
+<p>上期我们说过通用定时器里面包含了基本定时器<br>所以我们上一期其实是只用了这个部分<br><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8%E8%AE%B0%E6%95%B0/2.webp"></p>
+<p>然后本篇我们先讲的通用定时器计数<br>因为定时器说白了就是记录<code>时钟</code>的信号。如果改成外部的话<br>那么就可以记录外部的<code>波</code>的数据</p>
+<p>我们先说第一个方法使用ETR</p>
+<h2 id="方法1：ETR"><a href="#方法1：ETR" class="headerlink" title="方法1：ETR"></a>方法1：ETR</h2><p><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8%E8%AE%B0%E6%95%B0/3.webp"></p>
+<p>ETR主要用这通用定时器的这些部分</p>
+<p>但是STM32的ETR引脚不多<br>虽然理论上每个通用定时器和高级定时器的CH1都是ETR<br>但是可能因为封装不同所以没<br>这里用STM32C8T6举例</p>
+<details>
+<summary>点击展开完整图片</summary>
+
+<p><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8%E8%AE%B0%E6%95%B0/4.webp"></p>
+</details>
+
+<p>他也就PA12（TIM1）  PA0（TIM2）有ETR<br>所以资源还是比较少的，但是配置相对简单。</p>
+<h3 id="参考代码函数"><a href="#参考代码函数" class="headerlink" title="参考代码函数"></a>参考代码函数</h3><h4 id="初始化ETR"><a href="#初始化ETR" class="headerlink" title="初始化ETR"></a><code>初始化ETR</code></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">void TIM_ETRClockMode2Config(TIM_TypeDef* TIMx, uint16_t TIM_ExtTRGPrescaler,uint16_t TIM_ExtTRGPolarity, uint16_t ExtTRGFilter)</span><br></pre></td></tr></table></figure> 
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TIM_TypeDef* TIMx</td>
+<td>TIM_TypeDef*</td>
+<td>选择的定时器</td>
+<td>TIM1~TIM8</td>
+</tr>
+<tr>
+<td>uint16_t TIM_ExtTRGPrescaler</td>
+<td>uint16_t</td>
+<td>选择分频器</td>
+<td>TIM_ExtTRGPSC_OFF&#x2F;&#x2F;不分频<br/>TIM_ExtTRGPSC_DIV2&#x2F;&#x2F;2分频<br/>IM_ExtTRGPSC_DIV4&#x2F;&#x2F;4分频<br/>TIM_ExtTRGPSC_DIV8&#x2F;&#x2F;8分频</td>
+</tr>
+<tr>
+<td>uint16_t TIM_ExtTRGPolarity</td>
+<td>uint16_t</td>
+<td>选择极性</td>
+<td>TIM_ExtTRGPolarity_Inverted&#x2F;&#x2F;低电平或下降沿有效<br/>TIM_ExtTRGPolarity_NonInverted&#x2F;&#x2F;高电平或上升沿有效</td>
+</tr>
+<tr>
+<td>uint16_t ExtTRGFilter</td>
+<td>uint16_t</td>
+<td>选择滤波器</td>
+<td>0x00到0x0F</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>无</td>
+<td>无</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<p>这条函数设定单片机使用ETR<br>但是关于滤波器也就是<code>uint16_t ExtTRGFilter</code><br>1、采样频率来源也就分频器<br>比如多少hz的采样，那么启用滤波器就会多少hz&#x2F;分频器<br>2、连续检测次数就是，连续检测到多少次，他才会记录一次</p>
+<details>
+<summary>参考滤波器</summary>
+
+<table>
+<thead>
+<tr>
+<th align="left">配置值 (二进制)</th>
+<th align="left">采样频率来源</th>
+<th align="left">连续检测次数 (N)</th>
+<th align="left">通俗效果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">0000</td>
+<td align="left">fCK_INT</td>
+<td align="left">2</td>
+<td align="left">无滤波（最快，干扰大慎用）</td>
+</tr>
+<tr>
+<td align="left">0001</td>
+<td align="left">fCK_INT</td>
+<td align="left">4</td>
+<td align="left">轻微滤波</td>
+</tr>
+<tr>
+<td align="left">0010</td>
+<td align="left">fCK_INT</td>
+<td align="left">8</td>
+<td align="left">稍强滤波</td>
+</tr>
+<tr>
+<td align="left">0011</td>
+<td align="left">fCK_INT</td>
+<td align="left">8</td>
+<td align="left">稍强滤波</td>
+</tr>
+<tr>
+<td align="left">0100</td>
+<td align="left">fDTS&#x2F;2</td>
+<td align="left">6</td>
+<td align="left">平衡型（推荐新手通用）</td>
+</tr>
+<tr>
+<td align="left">0101</td>
+<td align="left">fDTS&#x2F;2</td>
+<td align="left">8</td>
+<td align="left">稳定型</td>
+</tr>
+<tr>
+<td align="left">0110</td>
+<td align="left">fDTS&#x2F;4</td>
+<td align="left">6</td>
+<td align="left">强滤波（适合按键 &#x2F; 远距离信号）</td>
+</tr>
+<tr>
+<td align="left">0111</td>
+<td align="left">fDTS&#x2F;4</td>
+<td align="left">8</td>
+<td align="left">强滤波</td>
+</tr>
+<tr>
+<td align="left">1000</td>
+<td align="left">fDTS&#x2F;8</td>
+<td align="left">6</td>
+<td align="left">极强滤波</td>
+</tr>
+<tr>
+<td align="left">1001</td>
+<td align="left">fDTS&#x2F;8</td>
+<td align="left">8</td>
+<td align="left">极强滤波</td>
+</tr>
+<tr>
+<td align="left">1010</td>
+<td align="left">fDTS&#x2F;16</td>
+<td align="left">5</td>
+<td align="left">超强力滤波</td>
+</tr>
+<tr>
+<td align="left">1011</td>
+<td align="left">fDTS&#x2F;16</td>
+<td align="left">6</td>
+<td align="left">超强力滤波</td>
+</tr>
+<tr>
+<td align="left">1100</td>
+<td align="left">fDTS&#x2F;32</td>
+<td align="left">5</td>
+<td align="left">极致抗干扰（响应最慢）</td>
+</tr>
+<tr>
+<td align="left">1101</td>
+<td align="left">fDTS&#x2F;32</td>
+<td align="left">6</td>
+<td align="left">极致抗干扰</td>
+</tr>
+<tr>
+<td align="left">1110</td>
+<td align="left">fDTS&#x2F;32</td>
+<td align="left">8</td>
+<td align="left">极致抗干扰</td>
+</tr>
+<tr>
+<td align="left">1111</td>
+<td align="left">fDTS&#x2F;32</td>
+<td align="left">8</td>
+<td align="left">极致抗干扰</td>
+</tr>
+</tbody></table>
+</details>
+
+<h4 id="读取CNT值"><a href="#读取CNT值" class="headerlink" title="读取CNT值"></a><code>读取CNT值</code></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uint16_t TIM_GetCounter(TIM_TypeDef* TIMx)</span><br></pre></td></tr></table></figure> 
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TIM_TypeDef* TIMx</td>
+<td>TIM_TypeDef*</td>
+<td>选择的定时器</td>
+<td>TIM1~TIM8</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>uint16_t</td>
+<td>读取当前CNT</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<h4 id="设置CNT值"><a href="#设置CNT值" class="headerlink" title="设置CNT值"></a><code>设置CNT值</code></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">void TIM_SetCounter(TIM_TypeDef* TIMx, uint16_t Counter);</span><br></pre></td></tr></table></figure> 
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TIM_TypeDef* TIMx</td>
+<td>TIM_TypeDef*</td>
+<td>选择的定时器</td>
+<td>TIM1~TIM8</td>
+</tr>
+<tr>
+<td>uint16_t Counter</td>
+<td>uint16_t</td>
+<td>设定CNT值</td>
+<td>0-65535</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>无</td>
+<td>无</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<h3 id="参考代码"><a href="#参考代码" class="headerlink" title="参考代码"></a>参考代码</h3><details>
+<summary>点击展开完整代码</summary>
+
+</details>
+
+<h2 id="方法2：TIX"><a href="#方法2：TIX" class="headerlink" title="方法2：TIX"></a>方法2：TIX</h2><p>TIX主要使用的是定时器的这个部分<br><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8%E8%AE%B0%E6%95%B0/5.webp"></p>
+<p>他对比于ETR来说TIM的4的通道都可以使用，但是使用前建议还是查一下表</p>
+<details>
+<summary>点击展开引脚表</summary>
+
+<p><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8%E8%AE%B0%E6%95%B0/6.webp"></p>
+</details>
+
+<p>他主要是通过TIMx的通道捕获，然后TIx通过TIxFPx（这里的x是未知数）通道<br>TIxFPx（这里的x是未知数）通道发送给下面的CCR寄存器<br>然后CCR每触发一次，都会有信号给到CNT。<br>然后就简单了，和上面一样，当CNT记满后触发中断<br>不过这也有个限制，就是CCR他不会自动复位，要自动手动复位CCR</p>
+<h3 id="参考代码函数-1"><a href="#参考代码函数-1" class="headerlink" title="参考代码函数"></a>参考代码函数</h3><h4 id="初始化通用定时器"><a href="#初始化通用定时器" class="headerlink" title="初始化通用定时器"></a><code>初始化通用定时器</code></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">void TIM_ICStructInit(TIM_ICInitTypeDef* TIM_ICInitStruct);</span><br></pre></td></tr></table></figure> 
+
+<p>TIM_ICInitTypeDef TIM_ICInitStructure; &#x2F;&#x2F;定义结构体</p>
+<p>先用这个来复位结构体<br><code>TIM_ICStructInit(&amp;TIM_ICInitStructure);</code></p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>参数</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TIM_ICInitStructure.Channel</td>
+<td>TIM_Channel_1<br>TIM_Channel_2<br>TIM_Channel_3<br>TIM_Channel_4</td>
+<td>选择通道</td>
+</tr>
+<tr>
+<td>TIM_ICInitStructure.ICPolarity</td>
+<td>TIM_ICPolarity_Rising（上升沿）<br>TIM_ICPolarity_Falling（下降沿）<br>TIM_ICPolarity_BothEdge（双边沿）</td>
+<td>选择极性</td>
+</tr>
+<tr>
+<td>TIM_ICInitStructure.ICSelection</td>
+<td>TIM_ICSelection_DirectTI（直接映射）<br>TIM_ICSelection_IndirectTI（间接映射）<br>TIM_ICSelection_TRC（从TRC输入）</td>
+<td>通道引脚直接连接捕获模块</td>
+</tr>
+<tr>
+<td>TIM_ICInitStructure.ICPrescaler</td>
+<td>TIM_ICPSC_DIV1（不分频）<br>TIM_ICPSC_DIV2（2分频）<br>TIM_ICPSC_DIV4（4分频）<br>TIM_ICPSC_DIV8（8分频）</td>
+<td>分频器</td>
+</tr>
+<tr>
+<td>TIM_ICInitStructure.ICFilter</td>
+<td>0x00 ~ 0x0F</td>
+<td>输入滤波</td>
+</tr>
+</tbody></table>
+<p>这里的输入滤波是采样次数<br>数字越高采样滤波越强，但是可能会带来一点点延迟</p>
+<p>关于映射模式：<br>直接模式就是字面意思<br>间接模式：</p>
+<details>
+<summary>参考解释</summary>
+
+<p><img src="/img/stm/STM32%E6%A0%87%E5%87%86%E5%BA%93%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8%E8%AE%B0%E6%95%B0/7.webp"><br>我们看这个图<br>我们可以看到<br>TI1FP2是到CC2的<br>TI2FP1是到CC1的<br>这个就是间接模式<br>当然有人问，TI1FP2和TI2FP2同时写入到CCR2咋办<br>STM32会进行仲裁直接大于间接</p>
+<p>当然下面CH3和CH4同理一样不多讲了</p>
+</details>
+TRC输入：
+读取内部事件（比如其他定时器溢出复位）来进行处理
+
+<h4 id="读取寄存器函数"><a href="#读取寄存器函数" class="headerlink" title="读取寄存器函数"></a><code>读取寄存器函数</code></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uint16_t TIM_GetCapture-X(TIM_TypeDef* TIMx);</span><br></pre></td></tr></table></figure> 
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-x</td>
+<td>—</td>
+<td>直接填1-4，选择读取不同的CCR寄存器</td>
+<td>TIM_GetCapture1<br>TIM_GetCapture2<br>TIM_GetCapture3<br>TIM_GetCapture4<br></td>
+</tr>
+<tr>
+<td>TIM_TypeDef* TIMx</td>
+<td>TIM_TypeDef*</td>
+<td>选择的定时器</td>
+<td>TIM1~TIM8</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>uint16_t</td>
+<td>读取当前CCR值</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<h4 id="设定寄存器CCR"><a href="#设定寄存器CCR" class="headerlink" title="设定寄存器CCR"></a><code>设定寄存器CCR</code></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">void TIM_SetCompare-x(TIM_TypeDef* TIMx, uint16_t Compare1);</span><br></pre></td></tr></table></figure> 
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>数据类型</th>
+<th>作用</th>
+<th>选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-x</td>
+<td>—</td>
+<td>直接填1-4，选择设定不同的CCR寄存器</td>
+<td>TIM_SetCompare1<br>TIM_SetCompare2<br>TIM_SetCompare3<br>TIM_SetCompare4</td>
+</tr>
+<tr>
+<td>TIM_TypeDef* TIMx</td>
+<td>TIM_TypeDef*</td>
+<td>选择的定时器</td>
+<td>TIM1~TIM8</td>
+</tr>
+<tr>
+<td>uint16_t Compare1</td>
+<td>uint16_t</td>
+<td>设定CCR的值</td>
+<td>0-65535</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>无</td>
+<td>无</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<h2 id="参考代码-1"><a href="#参考代码-1" class="headerlink" title="参考代码"></a>参考代码</h2>
+    </div>
+    <footer class="article-footer">
+        <a class="article-category-link" href="/categories/STM32/" title="STM32" data-aos="zoom-in">STM32</a>
+
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="/tags/STM32/" rel="tag" title="STM32">STM32</a></li></ul>
+
+    </footer>
+  </div>
+    <nav id="article-nav" aria-label="Article navigation" data-aos="fade-up">
+      <div class="article-nav-link-wrap left">
+            <img data-src="/covers/7.webp" data-sizes="auto" alt="STM32标准库定时器从模式" class="lazyload">
+        <a href="/2026/04/12/stm/%E6%A0%87%E5%87%86%E5%BA%93/STM32%E6%A0%87%E5%87%86%E5%BA%93%E5%AE%9A%E6%97%B6%E5%99%A8%E4%BB%8E%E6%A8%A1%E5%BC%8F/" aria-label="前一篇: STM32标准库定时器从模式" title="前一篇: STM32标准库定时器从模式"></a>
+        <div class="article-nav-caption">前一篇</div>
+        <h3 class="article-nav-title">
+            STM32标准库定时器从模式
+        </h3>
+      </div>
+    <div class="article-nav-link-wrap right">
+          <img data-src="/covers/1.webp" data-sizes="auto" alt="STM32标准库基本定时器" class="lazyload">
+      <a href="/2026/04/10/stm/%E6%A0%87%E5%87%86%E5%BA%93/STM32%E6%A0%87%E5%87%86%E5%BA%93%E5%9F%BA%E6%9C%AC%E5%AE%9A%E6%97%B6%E5%99%A8/" aria-label="后一篇: STM32标准库基本定时器"  title="后一篇: STM32标准库基本定时器"></a>
+      <div class="article-nav-caption">后一篇</div>
+      <h3 class="article-nav-title">
+          STM32标准库基本定时器
+      </h3>
+    </div>
+  </nav>
+
+</article>
+
+
+</section>
+        </div>
+        <footer id="footer" aria-label="Site footer">
+  <div style="width: 100%; overflow: hidden">
+    <div class="footer-line"></div>
+  </div>
+  <div id="footer-info">
+    <div>
+      <span class="icon-copyright"></span>
+        2020-2026
+        <span class="footer-info-sep rotate"></span>
+      HiW
+    </div>
+  </div>
+</footer>
+
+          <div class="sidebar-top">
+            <div class="sidebar-top-taichi rotate"></div>
+            <div class="arrow-up"></div>
+          </div>
+        <div id="mask" class="hide"></div>
+      </div>
+      <nav id="mobile-nav" aria-label="Mobile navigation">
+  <div class="sidebar-wrap">
+        <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%B3%951%EF%BC%9AETR"><span class="toc-number">1.</span> <span class="toc-text">方法1：ETR</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E4%BB%A3%E7%A0%81%E5%87%BD%E6%95%B0"><span class="toc-number">1.1.</span> <span class="toc-text">参考代码函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96ETR"><span class="toc-number">1.1.1.</span> <span class="toc-text">初始化ETR</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96CNT%E5%80%BC"><span class="toc-number">1.1.2.</span> <span class="toc-text">读取CNT值</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AECNT%E5%80%BC"><span class="toc-number">1.1.3.</span> <span class="toc-text">设置CNT值</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E4%BB%A3%E7%A0%81"><span class="toc-number">1.2.</span> <span class="toc-text">参考代码</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%B3%952%EF%BC%9ATIX"><span class="toc-number">2.</span> <span class="toc-text">方法2：TIX</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E4%BB%A3%E7%A0%81%E5%87%BD%E6%95%B0-1"><span class="toc-number">2.1.</span> <span class="toc-text">参考代码函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8"><span class="toc-number">2.1.1.</span> <span class="toc-text">初始化通用定时器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E5%AF%84%E5%AD%98%E5%99%A8%E5%87%BD%E6%95%B0"><span class="toc-number">2.1.2.</span> <span class="toc-text">读取寄存器函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%BE%E5%AE%9A%E5%AF%84%E5%AD%98%E5%99%A8CCR"><span class="toc-number">2.1.3.</span> <span class="toc-text">设定寄存器CCR</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E4%BB%A3%E7%A0%81-1"><span class="toc-number">3.</span> <span class="toc-text">参考代码</span></a></li></ol>
+</div>
+</div>
+        <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="HiW" class="lazyload">
+  <div class="sidebar-author-name">HiW</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">61</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">10</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">15</div>
+  </div>
+</div>
+<div class="sidebar-social" >
+</div>
+<div class="sidebar-menu">
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="首页"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xe3af;
+          </div>
+        <div class="sidebar-menu-link">首页</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf187;
+          </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/about" aria-label="关于"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf05a;
+          </div>
+        <div class="sidebar-menu-link">关于</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf500;
+          </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+</div>
+</div>
+  </div>
+      <div class="sidebar-btn-wrapper">
+        <div class="sidebar-toc-btn current"></div>
+        <div class="sidebar-common-btn"></div>
+      </div>
+</nav>
+
+    </div>
+      <div class="site-search">
+        <div class="reimu-popup popup">
+          <div class="reimu-search">
+            <div class="reimu-search-input-icon"></div>
+            <div id="reimu-search-input"></div>
+            <div class="popup-btn-close"></div>
+          </div>
+          <div class="reimu-results">
+            <div id="reimu-stats"></div>
+            <div id="reimu-hits"></div>
+            <div id="reimu-pagination" class="reimu-pagination"></div>
+          </div>
+          <img class="reimu-bg" src="/images/reimu.png" loading="lazy" decoding="async" fetchpriority="low"/>
+        </div>
+      </div>
+    
+<script src="https://npm.webcache.cn/lazysizes@5.3.2/lazysizes.min.js" integrity="sha384-3gT&#x2F;vsepWkfz&#x2F;ff7PpWNUeMzeWoH3cDhm&#x2F;A8jM7ouoAK0&#x2F;fP&#x2F;9bcHHR5kHq2nf+e" crossorigin="anonymous"></script>
+
+
+<script src="https://npm.webcache.cn/clipboard@2.0.11/dist/clipboard.min.js" integrity="sha384-J08i8An&#x2F;QeARD9ExYpvphB8BsyOj3Gh2TSh1aLINKO3L0cMSH2dN3E22zFoXEi0Q" crossorigin="anonymous"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+  
+<script src="/js/aos.js"></script>
+
+  <script>
+    var aosInit = () => {
+      AOS.init({
+        duration: 1000,
+        easing: "ease",
+        once: true,
+        offset: 50,
+      });
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', aosInit);
+    } else {
+      aosInit();
+    }
+  </script>
+
+
+<script src="/js/pjax_script.js" data-pjax></script>
+
+
+
+  <script>
+    var ALGOLIA_CONFIG = {
+      logo: "/images/algolia_logo.svg",
+      algolia: {
+        applicationID: "29NDGCSMY6",
+        apiKey: "6d330d43eefc2a0de625b8b431bcb121",
+        indexName: "binging",
+        hits: {
+          "per_page": parseInt("10")
+        },
+        labels: {
+          "input_placeholder": "搜索.....",
+          "hits_empty": "未发现与 「${query}」相关内容",
+          "hits_stats": "找到${hits}条结果（用时 ${time} ms）"
+        }
+      }
+    };
+  </script>
+  
+<script src="https://npm.webcache.cn/algoliasearch@4.17.1/dist/algoliasearch-lite.umd.js" integrity="sha384-xvLS0jfKuoREs7pqkRI&#x2F;OI8GcqohO5S+jQz7ZBtQXnsXmD+9jDOOY4cL6dCPzlrk" crossorigin="anonymous" defer></script>
+
+  
+<script src="https://npm.webcache.cn/@reimujs/instantsearch.js@4.57.0-beta.1/dist/instantsearch.production.min.js" integrity="sha384-aagKMe8nkqaP2DYQc8kkYOL5l+M5Q2WH&#x2F;Uhr4teOh0Ybp0RZj0kUSDm45qPikMjK" crossorigin="anonymous" defer></script>
+
+  
+<script src="/js/algolia_search.js" defer></script>
+
+
+  <script>
+    var setupFirework = () => {
+      if (!false || !window.matchMedia('(max-width: 768px)').matches) {
+        window.firework && window.firework(JSON.parse('{"excludeElements":["a","button"],"particles":[{"shape":"circle","move":["emit"],"easing":"easeOutExpo","colors":["var(--red-1)","var(--red-2)","var(--red-3)","var(--red-4)"],"number":20,"duration":[1200,1800],"shapeOptions":{"radius":[16,32],"alpha":[0.3,0.5]}},{"shape":"circle","move":["diffuse"],"easing":"easeOutExpo","colors":["var(--red-0)"],"number":1,"duration":[1200,1800],"shapeOptions":{"radius":20,"alpha":[0.2,0.5],"lineWidth":6}}]}'));
+      }
+    }
+  </script>
+  
+<script src="https://npm.webcache.cn/mouse-firework@0.2.0/dist/index.umd.js" integrity="sha384-qi9WggRt19tv8Vc7pCHW3ulMNLwrn515zaLEWZjl1px07vz8+pUoWX8n1rgq282T" crossorigin="anonymous" onload="setupFirework()" defer></script>
+
+
+
+
+
+
+<div id="lazy-script">
+  <div>
+      
+      
+      <script data-pjax>
+        window.REIMU_POST = {
+          author: "HiW",
+          title: "STM32标准库通用定时器记数",
+          url: "https://binging.top/2026/04/11/stm/%E6%A0%87%E5%87%86%E5%BA%93/STM32%E6%A0%87%E5%87%86%E5%BA%93%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8%E8%AE%B0%E6%95%B0/",
+          excerpt: "",
+          description: "",
+          stripContent: "上期我们讲了STM32标准库基本定时器 这个图看起来很复杂其实也就这样（你知道我想说什么） 上期我们说过通用定时器里面包含了基本定时器所以我们上一期其实是只用了这个部分 然后本篇我们先讲的通用定时器计数因为定时器说白了就是记录时钟的信号。如果改成外部的话那么就可以记录外部的波的数据 我们先说第一个方法使用ETR 方法1：ETR ETR主要用这通用定时器的这些部分 但是STM32的ETR引脚不多虽然理论上每个通用定时器和高级定时器的CH1都是ETR但是可能因为封装不同所以没这里用STM32C8T6",
+          date: "Sat Apr 11 2026 10:35:00 GMT+0800",
+          updated: "Sun Apr 12 2026 19:10:52 GMT+0800",
+          cover: "/images/banner.webp",
+        };
+      </script>
+        
+<script src="/js/insert_highlight.js" data-pjax></script>
+
+      
+<script src="/js/tabs.js" data-pjax defer></script>
+
+      <script type="module" data-pjax>
+        (async () => {
+          const PhotoSwipeLightbox = (await safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.min.js", "sha384-DiL6M/gG+wmTxmCRZyD1zee6lIhawn5TGvED0FOh7fXcN9B0aZ9dexSF/N6lrZi/")).default;
+          const initPswp = (gallery, children) => {
+            if (_$$(`${gallery} ${children}`).length > 0) {
+              new PhotoSwipeLightbox({
+                gallery,
+                children,
+                pswpModule: () => safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.esm.min.js", "sha384-WkkO3GCmgkC3VQWpaV8DqhKJqpzpF9JoByxDmnV8+oTJ7m3DfYEWX1fu1scuS4+s")
+              }).init();
+            }
+          }
+          const pswp = () => {
+            initPswp('.article-entry', 'a.article-gallery-item');
+            initPswp('.article-gallery', 'a.article-gallery-item');
+          }
+          pswp();
+        })();
+      </script>
+        
+
+
+  </div>
+</div>
+
+
+  <script>
+    console.log(String.raw`%c 
+ ______     ______     __     __    __     __  __    
+/\  == \   /\  ___\   /\ \   /\ "-./  \   /\ \/\ \   
+\ \  __<   \ \  __\   \ \ \  \ \ \-./\ \  \ \ \_\ \  
+ \ \_\ \_\  \ \_____\  \ \_\  \ \_\ \ \_\  \ \_____\ 
+  \/_/ /_/   \/_____/   \/_/   \/_/  \/_/   \/_____/ 
+                                                  
+`,'color: #ff5252;')
+    console.log('%c Theme.Reimu v' + '1.12.3' + ' %c https://github.com/D-Sketon/hexo-theme-reimu ', 'color: white; background: #ff5252; padding:5px 0;', 'padding:4px;border:1px solid #ff5252;')
+  </script>
+  
+
+
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
+</script>
+
+
+
+
+  </body>
+  </html>

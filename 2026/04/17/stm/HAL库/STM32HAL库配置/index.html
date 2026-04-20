@@ -1,0 +1,782 @@
+  <!DOCTYPE html>
+  <html lang="zh-CN"  
+      data-theme-mode="auto"
+  >
+  <head>
+  <meta charset="utf-8">
+  
+  
+  
+  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN":"复制成功 (*^▽^*)"},"fail":{"zh-CN":"复制失败 (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'https://binging.top';</script>
+  <title>
+    STM32HAL库配置 | Binging
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic|Noto Serif SC:400,400italic,700,700italic&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic|Noto Serif SC:400,400italic,700,700italic&display=swap" media="print" onload="this.media='all'">
+    
+<link rel="stylesheet" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/regular.min.css" integrity="sha384-4qYppzjH8EiA+cGdaubu2vL7Rk8WGiqCSj7oRuP1uwtFWkfKNHD20lPfcrbQc8dU" crossorigin="anonymous">
+<link rel="stylesheet" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/solid.min.css" integrity="sha384-wbMWab3UDSPm2kvIgVOn&#x2F;d9KPTecgPU1+Nb3zoQrm&#x2F;oVu0EkPL6IaKinjbwW0rum" crossorigin="anonymous">
+
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/brands.min.css" integrity="sha384-KTGeC2hIMzpeQakhsmzB9bZfhCD5xZZCgI1iZH6f/O457SxzlkzTQg/WXFNoi3ih" crossorigin="anonymous">
+<link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/v5-font-face.min.css" integrity="sha384-nJ1ThfldViXoLpJ6jlKcP2beas8BMbYq26SG9Hi8cH89bZi4RZ644v7helMCqJxd" crossorigin="anonymous">
+<link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/@fortawesome/fontawesome-free@7.1.0/css/v4-font-face.min.css" integrity="sha384-UlkrhOIvZxJFd4MElSUp7ow6/RUeYKi/orfCZIRRiOENFuQPIAA3T3HjYfmBRhNq" crossorigin="anonymous">
+    
+<link rel="stylesheet" href="/css/loader.css">
+
+    <meta name="description" content="关于HAL库STM32的标准库其实已经停更仅支持早期系列（F0&#x2F;F1&#x2F;F2&#x2F;F3&#x2F;F4&#x2F;L1）但是因为标准库的影响够远，很多国产的芯片也接近标准库的风格去开发 对于新时代来说要开发stm32更加建议的是HAL库和LL库 HAL更加注重效率，开发更简单 而LL库更加接近底层寄存器开发，所以难度会大一点 我们这里介绍的是HAL开发 cubemxSTM3">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STM32HAL库配置">
+<meta property="og:url" content="https://binging.top/2026/04/17/stm/HAL%E5%BA%93/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/index.html">
+<meta property="og:site_name" content="Binging">
+<meta property="og:description" content="关于HAL库STM32的标准库其实已经停更仅支持早期系列（F0&#x2F;F1&#x2F;F2&#x2F;F3&#x2F;F4&#x2F;L1）但是因为标准库的影响够远，很多国产的芯片也接近标准库的风格去开发 对于新时代来说要开发stm32更加建议的是HAL库和LL库 HAL更加注重效率，开发更简单 而LL库更加接近底层寄存器开发，所以难度会大一点 我们这里介绍的是HAL开发 cubemxSTM3">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/1.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/2.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/5.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/4.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/3.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/6.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/7.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/8.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/9.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/10.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/11.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/12.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/13.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/15.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/10.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/14.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/16.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/17.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/18.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/19.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/20.webp">
+<meta property="og:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/21.webp">
+<meta property="article:published_time" content="2026-04-17T04:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-17T10:36:33.249Z">
+<meta property="article:author" content="HiW">
+<meta property="article:tag" content="STM32">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://binging.top/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/1.webp">
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.css" integrity="sha384-IfxC36XL/toUyJ939C73PcgMuRzAZuIzZxE38drsmO5p6jD7ei+Zx/1oA/0l8ysE" crossorigin="anonymous">
+    
+<script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous"></script>
+
+    
+<link rel="stylesheet" href="https://npm.webcache.cn/@reimujs/aos@0.1.2/dist/aos.css" integrity="sha384-GMRP93c6Hkz9JVKGAuRR3nTS7M07RwPgTFenXiosjq2VbVgvdDNcz1g6Mkj8AONa" crossorigin="anonymous">
+
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+  <body>
+      <div id='loader'>
+    <div class="loading-left-bg loading-bg"></div>
+    <div class="loading-right-bg loading-bg"></div>
+    <div class="spinner-box">
+      <div class="loading-taichi rotate">
+          <svg width="150" height="150" viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="https://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+            <path d="M303.5 432A80 80 0 0 1 291.5 592A80 80 0 0 1 303.5 432z" fill="var(--red-1, #ff5252)" />
+            <path d="M512 65A447 447 0 0 1 512 959L512 929A417 417 0 0 0 512 95A417 417 0 0 0 512 929L512 959A447 447 0 0 1 512 65z 
+           M512 95A417 417 0 0 1 929 512A208.5 208.5 0 0 1 720.5 720.5L720.5 592A80 80 0 0 0 720.5 432A80 80 0 0 0 720.5 592L720.5 720.5A208.5 208.5 0 0 1 512 512A208.5 208.5 0 0 0 303.5 303.5A208.5 208.5 0 0 0 95 512A417 417 0 0 1 512 95z" fill="var(--red-1, #ff5252)" />
+          </svg>
+      </div>
+      <div class="loading-word">少女祈祷中...</div>
+    </div>
+  </div>
+  <script>
+    var time = null;
+    var loaderEl = document.getElementById('loader');
+    var startLoading = () => {
+      time = Date.now();
+      loaderEl.classList.remove("loading");
+    }
+    var hideLoader = () => {
+      document.body.style.overflow = 'auto';
+      loader.classList.add('loading');
+    };
+
+    var endLoading = () => {
+      if (!time) {
+        hideLoader();
+      } else {
+        if (Date.now() - time > 500) {
+          time = null;
+          hideLoader();
+        } else {
+          setTimeout(endLoading, 500 - (Date.now() - time));
+          time = null;
+        }
+      }
+    }
+    window.addEventListener('DOMContentLoaded', endLoading);
+    loaderEl.addEventListener('click', endLoading);
+  </script>
+<div id="copy-tooltip"></div>
+<div id="heatmap-tooltip"></div>
+
+
+    <div id="container">
+      <div id="wrap">
+        <div id="header-nav">
+  <nav id="main-nav" aria-label="Primary navigation">
+        <a class="main-nav-link-wrap" href="/">
+            <div class="main-nav-icon icon ">
+                  &#xe3af;
+            </div>
+          <span class="main-nav-link">首页</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/archives">
+            <div class="main-nav-icon icon ">
+                  &#xf187;
+            </div>
+          <span class="main-nav-link">归档</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/about">
+            <div class="main-nav-icon icon ">
+                  &#xf05a;
+            </div>
+          <span class="main-nav-link">关于</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/friend">
+            <div class="main-nav-icon icon ">
+                  &#xf500;
+            </div>
+          <span class="main-nav-link">友链</span>
+        </a>
+    <a id="main-nav-toggle" class="nav-icon" aria-label="Toggle navigation" role="button"></a>
+  </nav>
+  <nav id="sub-nav" aria-label="Secondary navigation">
+      <a id="nav-search-btn" class="nav-icon popup-trigger" title="搜索" aria-label="搜索"></a>
+  </nav>
+</div>
+<header id="header" aria-label="Site header">
+        <picture>
+        </picture>
+          <img  fetchpriority="high" src="/images/banner.webp" alt="STM32HAL库配置">
+  <div id="header-outer">
+    <div id="header-title">
+          <span id="logo">
+            <h1 data-aos="slide-up">STM32HAL库配置</h1>
+          </span>
+        <h2 id="subtitle-wrap" data-aos="slide-down">
+        </h2>
+    </div>
+  </div>
+</header>
+
+        <div id="content" aria-label="Page content"  class="sidebar-right" >
+          <aside id="sidebar" aria-label="Sidebar">
+  <div class="sidebar-wrapper-container sticky">
+  <div class="sidebar-wrapper">
+    <div class="sidebar-wrap" data-aos="fade-up">
+          <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E4%BA%8EHAL%E5%BA%93"><span class="toc-number">1.</span> <span class="toc-text">关于HAL库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#cubemx"><span class="toc-number">2.</span> <span class="toc-text">cubemx</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85"><span class="toc-number">3.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E8%8A%AF%E7%89%87%E5%BA%93"><span class="toc-number">4.</span> <span class="toc-text">安装芯片库</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A6%BB%E7%BA%BF%E5%AE%89%E8%A3%85"><span class="toc-number">4.1.</span> <span class="toc-text">离线安装</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B0%E5%BB%BA%E5%B7%A5%E7%A8%8B"><span class="toc-number">5.</span> <span class="toc-text">新建工程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E5%B7%A5%E7%A8%8B"><span class="toc-number">6.</span> <span class="toc-text">配置工程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%80%E5%90%AF%E6%97%B6%E9%92%9F"><span class="toc-number">7.</span> <span class="toc-text">开启时钟</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BE%93%E5%87%BA%E5%B7%A5%E7%A8%8B"><span class="toc-number">8.</span> <span class="toc-text">输出工程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%93%E5%BC%80%E7%94%9F%E6%88%90%E7%9A%84%E5%B7%A5%E7%A8%8B"><span class="toc-number">9.</span> <span class="toc-text">打开生成的工程</span></a></li></ol>
+</div>
+</div>
+          <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="HiW" class="lazyload">
+  <div class="sidebar-author-name">HiW</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">61</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">10</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">15</div>
+  </div>
+</div>
+<div class="sidebar-social" >
+</div>
+<div class="sidebar-menu">
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="首页"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xe3af;
+          </div>
+        <div class="sidebar-menu-link">首页</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf187;
+          </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/about" aria-label="关于"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf05a;
+          </div>
+        <div class="sidebar-menu-link">关于</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf500;
+          </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+</div>
+</div>
+          <div class="sidebar-btn-wrapper" style="position:static">
+            <div class="sidebar-toc-btn current"></div>
+            <div class="sidebar-common-btn"></div>
+          </div>
+    </div>
+  </div>
+  <div class="sidebar-widget">
+  </div>
+  </div>
+</aside>
+
+          <section id="main" aria-label="Main content"><article id="post-stm/HAL库/STM32HAL库配置" class="h-entry article" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner" data-aos="fade-up">
+    <div class="article-meta">
+      <div class="article-date">
+  <span class="article-date-link icon-calendar" data-aos="zoom-in">
+    <time datetime="2026-04-17T04:00:00.000Z" itemprop="datePublished">2026-04-17</time>
+    <time style="display: none;" id="post-update-time">2026-04-17</time>
+  </span>
+</div>
+
+    </div>
+    
+    <div class="hr-line"></div>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+        <h2 id="关于HAL库"><a href="#关于HAL库" class="headerlink" title="关于HAL库"></a>关于HAL库</h2><p>STM32的标准库其实已经停更仅支持早期系列（F0&#x2F;F1&#x2F;F2&#x2F;F3&#x2F;F4&#x2F;L1）<br>但是因为标准库的影响够远，很多国产的芯片也接近标准库的风格去开发</p>
+<p>对于新时代来说要开发stm32更加建议的是HAL库和LL库</p>
+<p>HAL更加注重效率，开发更简单</p>
+<p>而LL库更加接近底层寄存器开发，所以难度会大一点</p>
+<p>我们这里介绍的是HAL开发</p>
+<h2 id="cubemx"><a href="#cubemx" class="headerlink" title="cubemx"></a>cubemx</h2><p>STM32cubemx是STM32发布新的嵌入式开发工具<br>他主要是可以用图形化直接快速配置<br>快速生成代码工厂文件，不用像以前一样要慢慢的手动导入各种库</p>
+<p>关于STM32cubemx下载：</p>
+<p><a target="_blank" rel="noopener" href="https://www.st.com.cn/zh/development-tools/stm32cubemx.html#overview">官网下载</a></p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>不能有中文路径！！！</p>
+<p>不能有中文路径！！！</p>
+<p>不能有中文路径！！！</p>
+<p><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/1.webp"></p>
+<p><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/2.webp"></p>
+<p>选择安装路径然后一直下一步就可以了</p>
+<h2 id="安装芯片库"><a href="#安装芯片库" class="headerlink" title="安装芯片库"></a>安装芯片库</h2><p>新版的cubemx不再要求登录ST账号了<br>但是如果你的cubemx还是没有网络的情况<br>建议去安装一下java看看有没有好转</p>
+<p><a target="_blank" rel="noopener" href="https://www.java.com/zh-CN/">JAVA下载</a></p>
+<p><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/5.webp"></p>
+<p>有这个标志就是说明没网，没有就是正常</p>
+<p><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/4.webp"></p>
+<p>我们点击<code>help</code>然后选择 <code>Check for Updates</code><br>看看有没有环境要更新</p>
+<p><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/3.webp"><br>我们点击<code>help</code>然后选择 <code>Manage embedded software packages</code></p>
+<p><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/6.webp"><br>选择要安装的芯片</p>
+<h3 id="离线安装"><a href="#离线安装" class="headerlink" title="离线安装"></a>离线安装</h3><p>如果你没网，可以去下载离线包</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/STMicroelectronics/STM32Cube_MCU_Overall_Offer">github下载</a></p>
+<p>左下角点<code>From Local</code>选择你的包去安装<br><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/7.webp"></p>
+<h2 id="新建工程"><a href="#新建工程" class="headerlink" title="新建工程"></a>新建工程</h2><p><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/8.webp"></p>
+<p>左上角点击<code>File</code>然后再选择<code>New Project</code>新建工厂</p>
+<p><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/9.webp"></p>
+<p>我们选择<code>CommercialPart Number</code>先搜索相应的芯片<br>然后选择芯片<br>然后点击右上角<code>Start Project</code>来创建芯片</p>
+<h2 id="配置工程"><a href="#配置工程" class="headerlink" title="配置工程"></a>配置工程</h2><p><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/10.webp"><br><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/11.webp"></p>
+<p>我们先来配置时钟</p>
+<p>红色：代表着STM32的4种时钟</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>中文</th>
+<th>速度</th>
+<th>来源</th>
+<th>精度</th>
+<th>主要用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HSE</td>
+<td>外部高速</td>
+<td>几 MHz~几十 MHz</td>
+<td>外部晶振</td>
+<td>高</td>
+<td>系统主时钟、高精度外设</td>
+</tr>
+<tr>
+<td>HSI</td>
+<td>内部高速</td>
+<td>8&#x2F;16MHz</td>
+<td>内部 RC</td>
+<td>中</td>
+<td>默认系统时钟、无晶振方案</td>
+</tr>
+<tr>
+<td>LSE</td>
+<td>外部低速</td>
+<td>32.768kHz</td>
+<td>32768 晶振</td>
+<td>很高</td>
+<td>RTC 精准计时</td>
+</tr>
+<tr>
+<td>LSI</td>
+<td>内部低速</td>
+<td>~32kHz</td>
+<td>内部 RC</td>
+<td>低</td>
+<td>看门狗、粗略计时</td>
+</tr>
+</tbody></table>
+<p>蓝色：代表着时钟不经过分频器和倍频系数直接作用</p>
+<p>黄色：代表经过分频器</p>
+<p><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/12.webp"><br>这个梯形一样的东西叫：系统时钟多路选择器</p>
+<p>选着哪一路的时钟的信号</p>
+<p>绿色：单片机实际运行时钟（F103c8t6最大频率是72Mhz）</p>
+<p>如果页面是灰色的无法进行选中或者修改，说明时钟没有开启</p>
+<h2 id="开启时钟"><a href="#开启时钟" class="headerlink" title="开启时钟"></a>开启时钟</h2><p><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/13.webp"></p>
+<p>我们点<code>Pinout &amp; Configuration </code><br>选择<code>RCC</code><br>然后选择你要开启<code>HSE</code>还是<code>LSE</code><br>这里我们选择开启<code>HSE</code>选择<code>Crystal/Ceramic Resonator	</code></p>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>含义</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Disable</td>
+<td>失能</td>
+<td>禁用</td>
+</tr>
+<tr>
+<td>Crystal&#x2F;Ceramic Resonator</td>
+<td>使用外接晶振 &#x2F; 陶瓷谐振器</td>
+<td>你板子上焊了晶振 &#x2F; 陶瓷谐振器（比如 8MHz 晶振），STM32 内部的振荡电路配合它产生时钟信号</td>
+</tr>
+<tr>
+<td>BYPASS Clock Source</td>
+<td>旁路时钟源（外部有源晶振 &#x2F; 时钟信号）</td>
+<td>你给 STM32 的 OSC_IN 引脚直接输入了一个现成的时钟信号（比如 50MHz 有源晶振输出），跳过了内部振荡电路</td>
+</tr>
+</tbody></table>
+<p>补充一点：<br><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/15.webp"></p>
+<p>记得配置<code>SYS</code>，不然芯片只能烧录一次了，如果忘记了要用TTL重新烧录</p>
+<table>
+<thead>
+<tr>
+<th align="left">选项</th>
+<th align="left">含义</th>
+<th align="left">适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">No Debug</td>
+<td align="left">禁用所有调试接口</td>
+<td align="left">生产环境，彻底关闭调试功能，释放调试引脚做普通IO，同时也能防止程序被读取</td>
+</tr>
+<tr>
+<td align="left">Serial Wire</td>
+<td align="left">SWD 单线调试（2线：SWDIO + SWCLK）</td>
+<td align="left">绝大多数开发场景，只需2根线，占用引脚少，是最常用的选项</td>
+</tr>
+<tr>
+<td align="left">JTAG (4 pins)</td>
+<td align="left">JTAG 4线模式（TMS、TCK、TDI、TDO）</td>
+<td align="left">需要兼容传统JTAG调试器，占用4个专用引脚</td>
+</tr>
+<tr>
+<td align="left">JTAG (5 pins)</td>
+<td align="left">JTAG 5线模式（4线 + nRST）</td>
+<td align="left">完整的JTAG接口，包含复位引脚，调试器可控制芯片复位</td>
+</tr>
+<tr>
+<td align="left">Trace Asynchronous Sw</td>
+<td align="left">SWD + 异步跟踪（SWO）</td>
+<td align="left">需要实时查看程序执行轨迹、输出调试信息，额外占用SWO引脚</td>
+</tr>
+</tbody></table>
+<p>然后回到：<code>Clock Configuration</code></p>
+<p><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/10.webp"><br><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/14.webp"><br>按照我的图片上配置就可以了</p>
+<h2 id="输出工程"><a href="#输出工程" class="headerlink" title="输出工程"></a>输出工程</h2><p><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/16.webp"></p>
+<p>不能有中文路径！！！</p>
+<p>不能有中文路径！！！</p>
+<p>不能有中文路径！！！</p>
+<p>我们点击<code>Project Manager</code><br>我们只需要修改<code>项目名称</code>还有<code>项目路径</code><br>然后修改要<code>输出的IDE</code> （MDK-ARM一般就是KEIL）版本号一般默认就好</p>
+<table>
+<thead>
+<tr>
+<th>配置项</th>
+<th>你的设置</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Project Name</td>
+<td>配置初始化</td>
+<td>工程名，建议改成英文 &#x2F; 数字，避免中文和空格，防止编译报错</td>
+</tr>
+<tr>
+<td>Project Location</td>
+<td>C:\Users\admin\Desktop</td>
+<td>工程路径，建议全英文路径，中文路径可能导致 Keil 编译失败</td>
+</tr>
+<tr>
+<td>Toolchain&#x2F;IDE</td>
+<td>MDK-ARM</td>
+<td>生成 Keil 工程，Min Version 选了 V5.32，适配 Keil5</td>
+</tr>
+<tr>
+<td>Minimum Heap Size</td>
+<td>0x200（512 字节）</td>
+<td>堆大小，用于动态内存分配，基础项目够用，用 malloc 建议加大</td>
+</tr>
+<tr>
+<td>Minimum Stack Size</td>
+<td>0x400（1024 字节）</td>
+<td>栈大小，用于局部变量和函数调用，基础项目够用，复杂项目可适当加大</td>
+</tr>
+<tr>
+<td>Firmware Package</td>
+<td>STM32Cube FW_F1 V1.8.7</td>
+<td>F1 系列的 HAL 库版本，勾选了 Use latest available version，会自动用最新版库</td>
+</tr>
+</tbody></table>
+<p>我们再点击<code>Project Manager</code></p>
+<p><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/17.webp"><br>建议把这个勾上<br><code>Backup previously generated files when re-generating</code></p>
+<table>
+<thead>
+<tr>
+<th>配置项</th>
+<th>作用与说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>STM32Cube MCU packages<br/> Copy all used libraries into the project folder</td>
+<td>把所有用到的 HAL 库文件复制到工程目录，推荐保留，这样工程可独立编译，不会依赖本地 CubeMX 库路径</td>
+</tr>
+<tr>
+<td>Peripheral initialization <br/> Generate peripheral initialization as a pair of .c&#x2F;.h files</td>
+<td>每个外设的初始化代码生成独立的.c&#x2F;.h文件，推荐保留，代码结构更清晰，方便管理</td>
+</tr>
+<tr>
+<td>Backup previous files</td>
+<td>重新生成代码时不备份旧文件，容易误删你写的代码，建议勾选</td>
+</tr>
+<tr>
+<td>Keep User Code when re-generating</td>
+<td>重新生成代码时，保留你写在&#x2F;* USER CODE BEGIN <em>&#x2F;和&#x2F;</em> USER CODE END *&#x2F;之间的代码，必须勾选，否则你的代码会被覆盖</td>
+</tr>
+<tr>
+<td>Delete previously generated files</td>
+<td>删除上一次生成的、本次不再使用的文件，避免工程残留垃圾文件，推荐保留</td>
+</tr>
+<tr>
+<td>HAL Settings</td>
+<td>Set all free pins as analog可降低功耗，Enable Full Assert用于调试时的断言检查，开发阶段建议按需开启</td>
+</tr>
+</tbody></table>
+<p><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/18.webp"></p>
+<p>最后点击右上角<code>GENERATE CODE</code>就可以生成工程</p>
+<p><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/19.webp"></p>
+<h2 id="打开生成的工程"><a href="#打开生成的工程" class="headerlink" title="打开生成的工程"></a>打开生成的工程</h2><p><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/20.webp"></p>
+<p><img src="/img/stm/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/21.webp"></p>
+<p>我们打开工程，在这里可以找到主函数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">这里不会保存</span><br><span class="line"></span><br><span class="line">/* USER CODE BEGIN  */</span><br><span class="line">  这个位置里面写代码</span><br><span class="line">/* USER CODE END  */</span><br><span class="line"></span><br><span class="line">这里不会保存</span><br><span class="line"></span><br><span class="line">/* USER CODE BEGIN  */</span><br><span class="line">  这个位置里面写代码</span><br><span class="line">/* USER CODE END  */</span><br><span class="line"></span><br><span class="line">这里不会保存</span><br></pre></td></tr></table></figure>
+<p>在cubeMX生成的工程中，一定要将代码写在“BEGIN”和“END”中</p>
+
+    </div>
+    <footer class="article-footer">
+        <a class="article-category-link" href="/categories/STM32/" title="STM32" data-aos="zoom-in">STM32</a>
+
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="/tags/STM32/" rel="tag" title="STM32">STM32</a></li></ul>
+
+    </footer>
+  </div>
+    <nav id="article-nav" aria-label="Article navigation" data-aos="fade-up">
+      <div class="article-nav-link-wrap left">
+            <img data-src="/covers/6.webp" data-sizes="auto" alt="STM32HAL库GPIO" class="lazyload">
+        <a href="/2026/04/20/stm/HAL%E5%BA%93/STM32HAL%E5%BA%93GPIO/" aria-label="前一篇: STM32HAL库GPIO" title="前一篇: STM32HAL库GPIO"></a>
+        <div class="article-nav-caption">前一篇</div>
+        <h3 class="article-nav-title">
+            STM32HAL库GPIO
+        </h3>
+      </div>
+    <div class="article-nav-link-wrap right">
+          <img data-src="/covers/4.webp" data-sizes="auto" alt="STM32标准库UART" class="lazyload">
+      <a href="/2026/04/14/stm/%E6%A0%87%E5%87%86%E5%BA%93/STM%E6%A0%87%E5%87%86%E5%BA%93UART/" aria-label="后一篇: STM32标准库UART"  title="后一篇: STM32标准库UART"></a>
+      <div class="article-nav-caption">后一篇</div>
+      <h3 class="article-nav-title">
+          STM32标准库UART
+      </h3>
+    </div>
+  </nav>
+
+</article>
+
+
+</section>
+        </div>
+        <footer id="footer" aria-label="Site footer">
+  <div style="width: 100%; overflow: hidden">
+    <div class="footer-line"></div>
+  </div>
+  <div id="footer-info">
+    <div>
+      <span class="icon-copyright"></span>
+        2020-2026
+        <span class="footer-info-sep rotate"></span>
+      HiW
+    </div>
+  </div>
+</footer>
+
+          <div class="sidebar-top">
+            <div class="sidebar-top-taichi rotate"></div>
+            <div class="arrow-up"></div>
+          </div>
+        <div id="mask" class="hide"></div>
+      </div>
+      <nav id="mobile-nav" aria-label="Mobile navigation">
+  <div class="sidebar-wrap">
+        <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E4%BA%8EHAL%E5%BA%93"><span class="toc-number">1.</span> <span class="toc-text">关于HAL库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#cubemx"><span class="toc-number">2.</span> <span class="toc-text">cubemx</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85"><span class="toc-number">3.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E8%8A%AF%E7%89%87%E5%BA%93"><span class="toc-number">4.</span> <span class="toc-text">安装芯片库</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A6%BB%E7%BA%BF%E5%AE%89%E8%A3%85"><span class="toc-number">4.1.</span> <span class="toc-text">离线安装</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B0%E5%BB%BA%E5%B7%A5%E7%A8%8B"><span class="toc-number">5.</span> <span class="toc-text">新建工程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E5%B7%A5%E7%A8%8B"><span class="toc-number">6.</span> <span class="toc-text">配置工程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%80%E5%90%AF%E6%97%B6%E9%92%9F"><span class="toc-number">7.</span> <span class="toc-text">开启时钟</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BE%93%E5%87%BA%E5%B7%A5%E7%A8%8B"><span class="toc-number">8.</span> <span class="toc-text">输出工程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%93%E5%BC%80%E7%94%9F%E6%88%90%E7%9A%84%E5%B7%A5%E7%A8%8B"><span class="toc-number">9.</span> <span class="toc-text">打开生成的工程</span></a></li></ol>
+</div>
+</div>
+        <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="HiW" class="lazyload">
+  <div class="sidebar-author-name">HiW</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">61</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">10</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">15</div>
+  </div>
+</div>
+<div class="sidebar-social" >
+</div>
+<div class="sidebar-menu">
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="首页"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xe3af;
+          </div>
+        <div class="sidebar-menu-link">首页</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf187;
+          </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/about" aria-label="关于"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf05a;
+          </div>
+        <div class="sidebar-menu-link">关于</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+          <div class="sidebar-menu-icon icon ">
+                &#xf500;
+          </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+</div>
+</div>
+  </div>
+      <div class="sidebar-btn-wrapper">
+        <div class="sidebar-toc-btn current"></div>
+        <div class="sidebar-common-btn"></div>
+      </div>
+</nav>
+
+    </div>
+      <div class="site-search">
+        <div class="reimu-popup popup">
+          <div class="reimu-search">
+            <div class="reimu-search-input-icon"></div>
+            <div id="reimu-search-input"></div>
+            <div class="popup-btn-close"></div>
+          </div>
+          <div class="reimu-results">
+            <div id="reimu-stats"></div>
+            <div id="reimu-hits"></div>
+            <div id="reimu-pagination" class="reimu-pagination"></div>
+          </div>
+          <img class="reimu-bg" src="/images/reimu.png" loading="lazy" decoding="async" fetchpriority="low"/>
+        </div>
+      </div>
+    
+<script src="https://npm.webcache.cn/lazysizes@5.3.2/lazysizes.min.js" integrity="sha384-3gT&#x2F;vsepWkfz&#x2F;ff7PpWNUeMzeWoH3cDhm&#x2F;A8jM7ouoAK0&#x2F;fP&#x2F;9bcHHR5kHq2nf+e" crossorigin="anonymous"></script>
+
+
+<script src="https://npm.webcache.cn/clipboard@2.0.11/dist/clipboard.min.js" integrity="sha384-J08i8An&#x2F;QeARD9ExYpvphB8BsyOj3Gh2TSh1aLINKO3L0cMSH2dN3E22zFoXEi0Q" crossorigin="anonymous"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+  
+<script src="/js/aos.js"></script>
+
+  <script>
+    var aosInit = () => {
+      AOS.init({
+        duration: 1000,
+        easing: "ease",
+        once: true,
+        offset: 50,
+      });
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', aosInit);
+    } else {
+      aosInit();
+    }
+  </script>
+
+
+<script src="/js/pjax_script.js" data-pjax></script>
+
+
+
+  <script>
+    var ALGOLIA_CONFIG = {
+      logo: "/images/algolia_logo.svg",
+      algolia: {
+        applicationID: "29NDGCSMY6",
+        apiKey: "6d330d43eefc2a0de625b8b431bcb121",
+        indexName: "binging",
+        hits: {
+          "per_page": parseInt("10")
+        },
+        labels: {
+          "input_placeholder": "搜索.....",
+          "hits_empty": "未发现与 「${query}」相关内容",
+          "hits_stats": "找到${hits}条结果（用时 ${time} ms）"
+        }
+      }
+    };
+  </script>
+  
+<script src="https://npm.webcache.cn/algoliasearch@4.17.1/dist/algoliasearch-lite.umd.js" integrity="sha384-xvLS0jfKuoREs7pqkRI&#x2F;OI8GcqohO5S+jQz7ZBtQXnsXmD+9jDOOY4cL6dCPzlrk" crossorigin="anonymous" defer></script>
+
+  
+<script src="https://npm.webcache.cn/@reimujs/instantsearch.js@4.57.0-beta.1/dist/instantsearch.production.min.js" integrity="sha384-aagKMe8nkqaP2DYQc8kkYOL5l+M5Q2WH&#x2F;Uhr4teOh0Ybp0RZj0kUSDm45qPikMjK" crossorigin="anonymous" defer></script>
+
+  
+<script src="/js/algolia_search.js" defer></script>
+
+
+  <script>
+    var setupFirework = () => {
+      if (!false || !window.matchMedia('(max-width: 768px)').matches) {
+        window.firework && window.firework(JSON.parse('{"excludeElements":["a","button"],"particles":[{"shape":"circle","move":["emit"],"easing":"easeOutExpo","colors":["var(--red-1)","var(--red-2)","var(--red-3)","var(--red-4)"],"number":20,"duration":[1200,1800],"shapeOptions":{"radius":[16,32],"alpha":[0.3,0.5]}},{"shape":"circle","move":["diffuse"],"easing":"easeOutExpo","colors":["var(--red-0)"],"number":1,"duration":[1200,1800],"shapeOptions":{"radius":20,"alpha":[0.2,0.5],"lineWidth":6}}]}'));
+      }
+    }
+  </script>
+  
+<script src="https://npm.webcache.cn/mouse-firework@0.2.0/dist/index.umd.js" integrity="sha384-qi9WggRt19tv8Vc7pCHW3ulMNLwrn515zaLEWZjl1px07vz8+pUoWX8n1rgq282T" crossorigin="anonymous" onload="setupFirework()" defer></script>
+
+
+
+
+
+
+<div id="lazy-script">
+  <div>
+      
+      
+      <script data-pjax>
+        window.REIMU_POST = {
+          author: "HiW",
+          title: "STM32HAL库配置",
+          url: "https://binging.top/2026/04/17/stm/HAL%E5%BA%93/STM32HAL%E5%BA%93%E9%85%8D%E7%BD%AE/",
+          excerpt: "",
+          description: "",
+          stripContent: "关于HAL库STM32的标准库其实已经停更仅支持早期系列（F0&amp;#x2F;F1&amp;#x2F;F2&amp;#x2F;F3&amp;#x2F;F4&amp;#x2F;L1）但是因为标准库的影响够远，很多国产的芯片也接近标准库的风格去开发 对于新时代来说要开发stm32更加建议的是HAL库和LL库 HAL更加注重效率，开发更简单 而LL库更加接近底层寄存器开发，所以难度会大一点 我们这里介绍的是HAL开发 cubemxSTM32cubemx是STM32发布新的嵌入式开发工具他主要是可以用图形化直接快速配置快速生成代码工厂文件",
+          date: "Fri Apr 17 2026 12:00:00 GMT+0800",
+          updated: "Fri Apr 17 2026 18:36:33 GMT+0800",
+          cover: "/images/banner.webp",
+        };
+      </script>
+        
+<script src="/js/insert_highlight.js" data-pjax></script>
+
+      
+<script src="/js/tabs.js" data-pjax defer></script>
+
+      <script type="module" data-pjax>
+        (async () => {
+          const PhotoSwipeLightbox = (await safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.min.js", "sha384-DiL6M/gG+wmTxmCRZyD1zee6lIhawn5TGvED0FOh7fXcN9B0aZ9dexSF/N6lrZi/")).default;
+          const initPswp = (gallery, children) => {
+            if (_$$(`${gallery} ${children}`).length > 0) {
+              new PhotoSwipeLightbox({
+                gallery,
+                children,
+                pswpModule: () => safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.esm.min.js", "sha384-WkkO3GCmgkC3VQWpaV8DqhKJqpzpF9JoByxDmnV8+oTJ7m3DfYEWX1fu1scuS4+s")
+              }).init();
+            }
+          }
+          const pswp = () => {
+            initPswp('.article-entry', 'a.article-gallery-item');
+            initPswp('.article-gallery', 'a.article-gallery-item');
+          }
+          pswp();
+        })();
+      </script>
+        
+
+
+  </div>
+</div>
+
+
+  <script>
+    console.log(String.raw`%c 
+ ______     ______     __     __    __     __  __    
+/\  == \   /\  ___\   /\ \   /\ "-./  \   /\ \/\ \   
+\ \  __<   \ \  __\   \ \ \  \ \ \-./\ \  \ \ \_\ \  
+ \ \_\ \_\  \ \_____\  \ \_\  \ \_\ \ \_\  \ \_____\ 
+  \/_/ /_/   \/_____/   \/_/   \/_/  \/_/   \/_____/ 
+                                                  
+`,'color: #ff5252;')
+    console.log('%c Theme.Reimu v' + '1.12.3' + ' %c https://github.com/D-Sketon/hexo-theme-reimu ', 'color: white; background: #ff5252; padding:5px 0;', 'padding:4px;border:1px solid #ff5252;')
+  </script>
+  
+
+
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
+</script>
+
+
+
+
+  </body>
+  </html>

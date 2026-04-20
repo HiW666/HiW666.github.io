@@ -1,0 +1,257 @@
+---
+title: hexo写作开发手册
+date: 2023/7/26 14:30:00
+categories: 
+- hexo
+tags:
+- hexo
+---
+欢迎观看hexo文章写作手册 此处直接写文章
+
+## 文章抬头写法
+
+<p>---<br>title: hexo写作开发手册<br>date: 2023/7/26 14:30:00<br>categories: <br>- hexo<br>tags:<br>- hexo<br>---</p>
+
+
+|title:|date:|categories:|tags:|
+|---|---|---|---|
+|文章名称|文章日期|分类|标签|
+
+一个文章只允许存在一个categories，但是允许多个tags
+效果本篇文章
+
+## 站点文件下载语法
+文件路径/img/github/hexo写作开发手册/hexo配置.txt
+{% codeblock %}
+<p>&lt;a href=&quot;/img/github/hexo写作开发手册/hexo配置.txt&quot; download=&quot;hexo配置.txt&quot;&gt;点击下载 hexo配置.txt&lt;/a&gt;</p>
+{% endcodeblock %}
+效果如下：
+本篇文章的原工程文件：<a href="/img/github/hexo写作开发手册/hexo配置.txt" download="hexo配置.txt">点击下载 hexo配置.txt</a>
+
+## 分割语法
+{% codeblock %}
+    <!--more-->
+{% endcodeblock %} 
+效果如下：
+<!--more-->
+
+
+## 标题语法
+{% codeblock %}
+    ## 此处为大号字体可做为标题
+
+    ### 此处为小标题
+{% endcodeblock %}    
+效果如下：
+## 此处为大号字体可做为标题
+
+### 此处为小标题
+
+## 代码跳转语法
+{% codeblock %}
+[代码跳转](https://binging.top/)
+{% endcodeblock %} 
+效果如下：
+[代码跳转](https://binging.top/)
+
+
+
+
+## 标记语法
+
+{% codeblock %}
+` 
+$ 重点
+`
+{% endcodeblock %} 
+效果如下：
+` 
+$ 重点
+`
+
+## 代码高亮语法：
+### 方法1（已经弃用）
+<!-- (已经弃用，因为会导致不知名的gcc编译错误)-->
+代码生成(已经弃用，因为会导致不知名的gcc编译错误)
+这里使用https://c.runoob.com/front-end/5536/ 选择cpp来进行生产html代码直接插入
+<pre class="cpp" style="font-family:monospace;"><span style="color: #339900;">#include &lt;stdio.h&gt;</span>
+        <span style="color: #0000ff;">int</span> main<span style="color: #008000;">&#40;</span><span style="color: #008000;">&#41;</span>
+         <span style="color: #008000;">&#123;</span>
+           <span style="color: #0000dd;">printf</span><span style="color: #008000;">&#40;</span><span style="color: #FF0000;">&quot;Hello, World!&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+           <span style="color: #0000ff;">return</span> <span style="color: #0000dd;">0</span><span style="color: #008080;">;</span>
+         <span style="color: #008000;">&#125;</span>
+&nbsp;</pre>
+<!-- 这里生成代码https://c.runoob.com/front-end/5536/ 选择cpp-->
+<!-- (已经弃用，因为会导致不知名的gcc编译错误)-->
+
+### 方法2（已经弃用）
+ 这里是手动生成代码，先回车首行开头4个空格，末行开头4个空格再回车
+
+【空格4个】#include <stdio.h>
+【空格4个】 int main()
+【空格4个】 {
+【空格4个】         printf("Hello, World!");
+【空格4个】         return 0;
+【空格4个】    }
+
+效果如下：
+<!-- 回车-->
+    #include <stdio.h>
+    int main()
+    {
+           printf("Hello, World!");
+           return 0;
+    }
+<!-- 回车-->
+<!-- 这里是手动生成代码，先回车首行开头4个空格，末行开头4个空格再回车-->
+
+### 方法3有三种方法格式
+<!-- 1. 显示 {% codeblock %} 语法 -->
+<pre><code>{% codeblock [title] [lang:language] [url] [link text] [additional options] %}
+code snippet
+{% endcodeblock %}</code></pre>
+
+<!-- 2. 显示 {% code %} 语法 -->
+<pre><code>{% code [title] [lang:language] [url] [link text] [additional options] %}
+code snippet
+{% endcode %}</code></pre>
+
+<!-- 3. 显示 Markdown 代码块语法 -->
+<pre><code>```[language] [title] [url] [link text] [additional options]
+code snippet
+```</code></pre>
+效果如下：
+{% codeblock %}
+#include <stdio.h>
+    int main()
+    {
+           printf("Hello, World!");
+           return 0;
+    }
+{% endcodeblock %} 
+
+## 图片插入语法
+
+{% codeblock %}
+![](img/github/hexo写作开发手册/1.webp)
+{% endcodeblock %} 
+
+效果如下：
+![](img/github/hexo写作开发手册/1.webp)
+备注：webp响应速度比jpg，png快
+
+## 注释语法
+{% codeblock %}
+<!-- 注释掉img/hexo写作开发手册/1.jpg -->
+{% endcodeblock %} 
+效果如下
+
+<!-- 注释掉img/hexo写作开发手册/1.jpg -->
+
+
+## 本地跳转文章语法
+
+    {% post_link hexo搭建教程 %}
+
+{% post_link hexo搭建教程 %}
+
+## 强制显示语法 方法1
+
+<pre><code>
+【回车】
+【3个空格】{% post_link hexo搭建教程 %}
+【回车】</code></pre>
+效果如下：
+   {% post_link hexo搭建教程 %}
+
+## 强制显示语法 方法2
+
+<pre>&lt;pre&gt;&lt;code&gt;这里为要显示的代码&lt;/code&gt;&lt;/pre&gt;</pre>
+效果如下：
+这里为要显示的代码
+
+<!-- 本地跳转文章 -->
+
+
+## 字体语法
+
+`
+<b>粗体</b>
+`
+效果如下：
+<b>粗体</b>
+
+`
+<i>斜体</i>
+`
+效果如下：
+<i>斜体</i>
+
+
+`
+<del>删除体</del>
+`
+效果如下：
+<del>删除体</del>
+
+
+`
+<ins>插入字</ins>
+`
+效果如下：
+<ins>插入字</ins>
+
+
+`
+<sup>上标字</sup>123
+`
+效果如下：
+<sup>上标字</sup>123
+
+
+`
+123<sub>下标字</sub>
+`
+效果如下：
+123<sub>下标字</sub>
+
+
+    `redis` 是非常重要的。
+
+效果如下：
+`redis` 是非常重要的。
+
+## 表格
+
+<p>|表格|属性|样式|<br>|---|---|---|<br>|一|二|三&lt;br/&gt;四|</p>
+
+效果如下：
+|表格|属性|样式|
+|---|---|---|
+|一|二|三<br/>四|
+
+## 折叠
+
+    <details>
+
+    <summary>点击展开完整代码</summary>
+
+    这里面可以放代码、放图片等
+
+    </details>
+
+效果如下：
+<details>
+
+<summary>点击展开完整代码</summary>
+
+这里面可以放代码、放图片等
+
+</details>
+
+找网易云生成
+效果如下：
+## 外链音乐
+<iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=4010201&auto=1&height=66"></iframe>
+
+
